@@ -31,12 +31,15 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onSuccess }) =
       });
 
       if (res.error) {
-        if (res.error.message?.includes('Invalid password') || res.error.message?.includes('credentials')) {
+        const msg = res.error.message || '';
+        if (msg.includes('Invalid password') || msg.includes('credentials') || msg.includes('INVALID_EMAIL_OR_PASSWORD')) {
           setError('Email ou senha incorretos. Verifique suas credenciais.');
-        } else if (res.error.message?.includes('User not found')) {
+        } else if (msg.includes('User not found')) {
           setError('Nenhum usuário cadastrado com este e-mail.');
+        } else if (msg.includes('Invalid origin')) {
+          setError('Origem da requisição não autorizada pelo servidor de autenticação.');
         } else {
-          setError(res.error.message || 'Falha ao autenticar. Tente novamente.');
+          setError(msg || 'Falha ao autenticar. Tente novamente.');
         }
         return;
       }
