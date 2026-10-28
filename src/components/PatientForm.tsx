@@ -28,6 +28,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ userId, onCancel, onSa
   // Aba 1: Pessoal
   const [nome, setNome] = useState('');
   const [dataNascimento, setDataNascimento] = useState('');
+  const [dataInicioTratamento, setDataInicioTratamento] = useState(() => new Date().toISOString().split('T')[0]);
   const [sexo, setSexo] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [email, setEmail] = useState('');
@@ -234,6 +235,30 @@ export const PatientForm: React.FC<PatientFormProps> = ({ userId, onCancel, onSa
       );
 
       const newId = res[0]?.id;
+
+      // Criar a primeira consulta automaticamente com a data de início do tratamento
+      if (newId && dataInicioTratamento) {
+        try {
+          await sql.query(
+            `INSERT INTO public.consultas (
+              paciente_id,
+              data_consulta,
+              peso,
+              observacoes,
+              created_at
+            ) VALUES ($1, $2, $3, $4, now())`,
+            [
+              newId,
+              dataInicioTratamento,
+              pesoFinal,
+              'Primeira consulta - Início do tratamento',
+            ]
+          );
+        } catch (consultaErr) {
+          console.warn('Não foi possível registrar a consulta inicial:', consultaErr);
+        }
+      }
+
       setSuccessMessage(true);
 
       setTimeout(() => {
@@ -364,6 +389,23 @@ export const PatientForm: React.FC<PatientFormProps> = ({ userId, onCancel, onSa
                 </div>
               </div>
 
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                  Data de Início do Tratamento
+                </label>
+                <input
+                  type="date"
+                  value={dataInicioTratamento}
+                  onChange={(e) => setDataInicioTratamento(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50/70 border border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 rounded-xl text-gray-900 text-sm font-medium outline-none transition"
+                />
+                <p className="text-[11px] text-gray-400 mt-1">
+                  Registrada automaticamente como a 1ª consulta
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
                   Sexo
