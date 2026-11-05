@@ -13,10 +13,9 @@ import {
   CheckCircle2, 
   AlertCircle, 
   X, 
-  Scale, 
-  ChevronRight,
-  FileText
+  Scale
 } from 'lucide-react';
+import { PlanosAlimentares } from './PlanosAlimentares';
 import { sql } from '../lib/neon';
 
 interface PatientProfileProps {
@@ -71,7 +70,6 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({ patientId, onBac
 
   // Planos Alimentares
   const [planos, setPlanos] = useState<PlanoAlimentar[]>([]);
-  const [selectedPlano, setSelectedPlano] = useState<PlanoAlimentar | null>(null);
 
   // Dados do Paciente (Editáveis)
   // Aba 1: Pessoal
@@ -1308,98 +1306,33 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({ patientId, onBac
       )}
 
       {/* ======================================================== */}
-      {/* SEÇÃO 3: PLANOS ALIMENTARES                              */}
+      {/* SEÇÃO 3: PLANOS ALIMENTARES (Prompt 6)                   */}
       {/* ======================================================== */}
       {activeSection === 'planos' && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-3xl border border-emerald-100 p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h3 className="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
-                <UtensilsCrossed className="w-5 h-5 text-emerald-600" />
-                <span>Planos Alimentares</span>
-              </h3>
-              <p className="text-xs text-gray-500">
-                Gere e consulte prescrições dietéticas personalizadas
-              </p>
-            </div>
-
-            {/* Botão em destaque conforme especificado no Prompt 5 */}
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-xl shadow-lg shadow-emerald-600/25 transition cursor-pointer hover:scale-[1.02] active:scale-95"
-            >
-              <UtensilsCrossed className="w-4 h-4" />
-              <span>Gerar Plano Alimentar</span>
-            </button>
-          </div>
-
-          {/* Histórico de Planos */}
-          <div className="bg-white rounded-3xl border border-emerald-100 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-gray-100">
-              <h4 className="text-base font-bold text-gray-900">
-                Histórico de Planos Salvos
-              </h4>
-            </div>
-
-            {planos.length === 0 ? (
-              <div className="py-16 px-6 text-center space-y-3">
-                <div className="w-12 h-12 mx-auto rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
-                  <UtensilsCrossed className="w-6 h-6" />
-                </div>
-                <h5 className="text-sm font-bold text-gray-800">
-                  Nenhum plano alimentar gerado ainda
-                </h5>
-                <p className="text-xs text-gray-500 max-w-sm mx-auto">
-                  Clique no botão acima para criar o primeiro plano nutricional personalizado do paciente.
-                </p>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-100">
-                {planos.map((plano) => (
-                  <div
-                    key={plano.id}
-                    onClick={() => setSelectedPlano(selectedPlano?.id === plano.id ? null : plano)}
-                    className="p-6 hover:bg-emerald-50/40 transition cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm">
-                          <FileText className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <span className="text-sm font-bold text-gray-900 block">
-                            Plano Alimentar
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            Gerado em {new Date(plano.created_at).toLocaleDateString('pt-BR')} às{' '}
-                            {new Date(plano.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700">
-                        <span>{selectedPlano?.id === plano.id ? 'Recolher' : 'Visualizar plano'}</span>
-                        <ChevronRight className={`w-4 h-4 transition ${selectedPlano?.id === plano.id ? 'rotate-90' : ''}`} />
-                      </div>
-                    </div>
-
-                    {/* Exibição completa ao expandir */}
-                    {selectedPlano?.id === plano.id && (
-                      <div className="mt-4 p-4 bg-gray-50 rounded-2xl border border-gray-200 text-xs text-gray-800 space-y-2">
-                        <div className="font-bold text-emerald-900 mb-2">Conteúdo do Plano:</div>
-                        <pre className="whitespace-pre-wrap font-sans text-xs bg-white p-4 rounded-xl border border-gray-100 leading-relaxed">
-                          {typeof plano.conteudo === 'string'
-                            ? plano.conteudo
-                            : JSON.stringify(plano.conteudo, null, 2)}
-                        </pre>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        <PlanosAlimentares
+          patientId={patientId}
+          initialPlanos={planos}
+          patientData={{
+            nome,
+            sexo,
+            peso,
+            altura,
+            objetivos,
+            objetivoTexto,
+            nivelAtividade,
+            patologias,
+            restricoes,
+            alergias,
+            medicamentos,
+            suplementos,
+            refeicoesDia,
+            horarioAcorda: horarioAcordaInput,
+            horarioDorme: horarioDormeInput,
+            litrosAgua,
+            atividadeFisica: praticaAtividade ? atividadeDescricao : 'Não pratica atividade física',
+            observacoes,
+          }}
+        />
       )}
 
       {/* ======================================================== */}
