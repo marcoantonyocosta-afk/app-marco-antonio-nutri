@@ -71,24 +71,56 @@ Gere um plano alimentar semanal completo, saudável e diversificado com base nos
 Dados do Paciente (Metas, Alergias, Restrições e Histórico):
 ${typeof dados_do_paciente === 'string' ? dados_do_paciente : JSON.stringify(dados_do_paciente, null, 2)}
 
-# Regras Críticas de Execução:
-- Você deve responder APENAS e estritamente o objeto JSON solicitado.
-- Não inclua blocos de código markdown (como \`\`\`json ... \`\`\`), explicações, introduções ou textos complementares.
-- Adapte o cardápio rigorosamente a quaisquer alergias ou restrições descritas nos dados.
-- Utilize alimentos comuns, acessíveis e culturalmente aceitos no Brasil.
-- Evite repetições monótonas de alimentos nos dias seguidos.
+# Regras OBRIGATÓRIAS e Críticas de Execução:
+1. QUANTIDADE DE OPÇÕES: Para CADA UMA das 5 refeições de CADA dia da semana, você DEVE OBRIGATORIAMENTE fornecer EXATAMENTE 5 opções completas, variadas e distintas no array (Opção 1, Opção 2, Opção 3, Opção 4 e Opção 5). NUNCA deixe com menos de 5 itens e NUNCA retorne itens vazios.
+2. Cada opção deve ser uma alternativa completa para aquela refeição (exemplo no Café da manhã: Opção 1: '2 ovos mexidos com 1 fatia de pão integral e café', Opção 2: 'Tapioca com queijo branco e suco de laranja', etc.).
+3. DIAS DA SEMANA: Cubra todos os 7 dias da semana: Segunda-feira, Terça-feira, Quarta-feira, Quinta-feira, Sexta-feira, Sábado, Domingo.
+4. REFEIÇÕES POR DIA: Em cada dia, preencha cafe_da_manha (5 opções), lanche_manha (5 opções), almoco (5 opções), lanche_tarde (5 opções) e jantar (5 opções).
+5. Adapte o cardápio rigorosamente a quaisquer alergias, intolerâncias ou restrições descritas nos dados do paciente.
+6. Utilize alimentos comuns, saudáveis e culturalmente aceitos no Brasil, calculados para atingir os objetivos informados.
+7. Responda APENAS o JSON puro correspondente ao schema. Sem markdown ou texto introdutório.
 
-O formato do JSON retornado deve seguir exatamente esta estrutura:
+Exemplo da estrutura exata (com 5 opções em cada array de refeição):
 {
   "plano_semanal": [
     {
       "dia": "Segunda-feira",
       "refeicoes": {
-        "cafe_da_manha": ["Opção 1", "Opção 2", "Opção 3", "Opção 4", "Opção 5"],
-        "lanche_manha": ["Opção 1", "Opção 2", "Opção 3", "Opção 4", "Opção 5"],
-        "almoco": ["Opção 1", "Opção 2", "Opção 3", "Opção 4", "Opção 5"],
-        "lanche_tarde": ["Opção 1", "Opção 2", "Opção 3", "Opção 4", "Opção 5"],
-        "jantar": ["Opção 1", "Opção 2", "Opção 3", "Opção 4", "Opção 5"]
+        "cafe_da_manha": [
+          "2 ovos mexidos + 1 fatia de pão integral + café sem açúcar",
+          "Crepioca (1 ovo + 2 colheres de goma) recheada com queijo cottage",
+          "Iogurte natural desnatado + 30g de aveia em flocos + 1 maçã picada",
+          "Vitamina de banana (200ml leite desnatado ou vegetal + 1 banana + chia)",
+          "1 fatia de pão 100% integral com pasta de amendoim integral e morangos"
+        ],
+        "lanche_manha": [
+          "1 maçã gala + 4 castanhas-do-pará",
+          "1 barra de proteína sem açúcar",
+          "1 pote de iogurte natural desnatado",
+          "1 fatia de melão ou mamão com sementes de abóbora",
+          "1 punhado pequeno (30g) de mix de nozes e amêndoas"
+        ],
+        "almoco": [
+          "150g de peito de frango grelhado + 4 colheres de arroz integral + feijão + salada verde à vontade",
+          "150g de filé de tilápia assada + purê de batata-doce + brócolis ao vapor",
+          "140g de patinho moído refogado + mandioca cozida + salada de tomate e rúcula",
+          "Omelete de 3 ovos com espinafre e tomate + arroz com lentilha + salada",
+          "150g de sobrecoxa assada sem pele + batata inglesa assada com alecrim + legumes salteados"
+        ],
+        "lanche_tarde": [
+          "1 banana prata amassada com 1 colher de sopa de farelo de aveia e canela",
+          "1 copo de iogurte desnatado batido com frutas vermelhas",
+          "2 torradas integrais com queijo ricota e orégano",
+          "1 scoop de whey protein batido com água ou leite desnatado",
+          "Salada de frutas frescas com chia"
+        ],
+        "jantar": [
+          "140g de peito de frango em tiras com abobrinha e cenoura refogadas + salada verde",
+          "Sopa nutritiva de legumes com carne magra desfiada",
+          "Omelete de 2 ovos com legumes e salada de folhas verdes com azeite",
+          "140g de peixe grelhado com legumes assados (abóbora e couve-flor)",
+          "Prato leve de salada colorida completa com atum sólido ao natural e grão-de-bico"
+        ]
       }
     }
   ]
