@@ -14,9 +14,12 @@ import {
   Utensils, 
   Moon, 
   Cookie,
-  Edit3
+  Edit3,
+  Download,
+  FileType
 } from 'lucide-react';
 import { sql } from '../lib/neon';
+import { exportarPlanoPDF, exportarPlanoDOCX } from '../utils/exportPlan';
 
 export interface RefeicoesDia {
   cafe_da_manha: string[];
@@ -100,6 +103,7 @@ export const PlanosAlimentares: React.FC<PlanosAlimentaresProps> = ({
 
   // Estados de Salvamento e Notificações
   const [isSaving, setIsSaving] = useState(false);
+  const [isExporting, setIsExporting] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
 
   useEffect(() => {
@@ -221,6 +225,25 @@ export const PlanosAlimentares: React.FC<PlanosAlimentaresProps> = ({
       list.push('');
     }
     return list.slice(0, 5);
+  };
+
+  // Exportação DOCX e PDF
+  const handleExport = async (formato: 'pdf' | 'docx', dataPlano: PlanoSemanalData, idKey = 'editor') => {
+    setIsExporting(`${idKey}_${formato}`);
+    try {
+      if (formato === 'pdf') {
+        await exportarPlanoPDF(dataPlano, patientData);
+        showToast('success', '📄 Plano Alimentar em PDF baixado com sucesso!');
+      } else {
+        await exportarPlanoDOCX(dataPlano, patientData);
+        showToast('success', '📝 Plano Alimentar em Word (.docx) baixado com sucesso!');
+      }
+    } catch (err) {
+      console.error('Erro ao exportar:', err);
+      showToast('error', 'Ocorreu um erro ao gerar o arquivo para download.');
+    } finally {
+      setIsExporting(null);
+    }
   };
 
   // Alteração de input nas refeições
@@ -417,11 +440,42 @@ export const PlanosAlimentares: React.FC<PlanosAlimentaresProps> = ({
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Botões de Download PDF / DOCX */}
+              <button
+                type="button"
+                disabled={Boolean(isExporting)}
+                onClick={() => handleExport('pdf', currentPlan, 'editor')}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-xs rounded-xl transition cursor-pointer disabled:opacity-50"
+                title="Baixar Plano em PDF"
+              >
+                {isExporting === 'editor_pdf' ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Download className="w-3.5 h-3.5" />
+                )}
+                <span>PDF</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={Boolean(isExporting)}
+                onClick={() => handleExport('docx', currentPlan, 'editor')}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-bold text-xs rounded-xl transition cursor-pointer disabled:opacity-50"
+                title="Baixar Plano em Word (.docx)"
+              >
+                {isExporting === 'editor_docx' ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <FileType className="w-3.5 h-3.5" />
+                )}
+                <span>DOCX</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setCurrentPlan(null)}
-                className="px-4 py-2.5 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition cursor-pointer"
+                className="px-3.5 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition cursor-pointer"
               >
                 Descartar
               </button>
@@ -431,17 +485,17 @@ export const PlanosAlimentares: React.FC<PlanosAlimentaresProps> = ({
                 type="button"
                 disabled={isSaving}
                 onClick={handleSalvarPlano}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-md shadow-emerald-600/20 transition cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-md shadow-emerald-600/20 transition cursor-pointer disabled:opacity-50"
               >
                 {isSaving ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Salvando no banco...</span>
+                    <span>Salvando...</span>
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4" />
-                    <span>Salvar Plano Alimentar</span>
+                    <span>Salvar Plano</span>
                   </>
                 )}
               </button>
@@ -595,7 +649,42 @@ export const PlanosAlimentares: React.FC<PlanosAlimentaresProps> = ({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      {/* Botões de Download PDF / DOCX para histórico */}
+                      {parsedData?.plano_semanal && (
+                        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            disabled={Boolean(isExporting)}
+                            onClick={() => parsedData && handleExport('pdf', parsedData, `hist_${plano.id}`)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-xl text-xs font-bold transition cursor-pointer disabled:opacity-50"
+                            title="Baixar PDF"
+                          >
+                            {isExporting === `hist_${plano.id}_pdf` ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Download className="w-3 h-3" />
+                            )}
+                            <span>PDF</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            disabled={Boolean(isExporting)}
+                            onClick={() => parsedData && handleExport('docx', parsedData, `hist_${plano.id}`)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition cursor-pointer disabled:opacity-50"
+                            title="Baixar DOCX"
+                          >
+                            {isExporting === `hist_${plano.id}_docx` ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <FileType className="w-3 h-3" />
+                            )}
+                            <span>DOCX</span>
+                          </button>
+                        </div>
+                      )}
+
                       <button
                         type="button"
                         onClick={(e) => {
