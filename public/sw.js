@@ -1,8 +1,10 @@
-const CACHE_NAME = 'nutrifit-cache-v1';
+const CACHE_NAME = 'nutrifit-cache-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png',
   '/pwa-icon.svg',
   '/favicon.svg'
 ];
