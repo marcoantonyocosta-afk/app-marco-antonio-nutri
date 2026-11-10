@@ -268,7 +268,7 @@ export const PlanosAlimentares: React.FC<PlanosAlimentaresProps> = ({
   const gerarMensagemResumoPlano = (plano: PlanoSemanalData) => {
     const nome = patientData.nome || 'Paciente';
     let msg = `Olá, ${nome}! 🥗\n\n`;
-    msg += `Aqui está o seu *Plano Alimentar Personalizado* preparado pelo *Dr. Marco Antonio*:\n\n`;
+    msg += `Aqui está o seu *Plano Alimentar Personalizado* preparado na clínica *NutriFit*:\n\n`;
 
     plano.plano_semanal.forEach((diaItem) => {
       msg += `📅 *${diaItem.dia.toUpperCase()}*\n`;
@@ -308,7 +308,7 @@ export const PlanosAlimentares: React.FC<PlanosAlimentaresProps> = ({
   const handleSendEmail = () => {
     if (!planToSend) return;
     const email = patientData.email || '';
-    const assunto = encodeURIComponent(`Seu Plano Alimentar Personalizado - Dr. Marco Antonio Nutrição`);
+    const assunto = encodeURIComponent(`Seu Plano Alimentar Personalizado - NutriFit`);
     const corpo = encodeURIComponent(gerarMensagemResumoPlano(planToSend));
     window.open(`mailto:${email}?subject=${assunto}&body=${corpo}`);
   };

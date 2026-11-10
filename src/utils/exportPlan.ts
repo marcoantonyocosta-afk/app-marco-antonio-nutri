@@ -55,7 +55,7 @@ export async function exportarPlanoPDF(planoData: PlanoSemanalData, paciente: Pa
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
-  doc.text(`Dr. Marco Antonio • Nutrição Clínica Funcional | Emitido em: ${dataHoje}`, 14, 20);
+  doc.text(`NutriFit • Nutrição Clínica & Funcional | Emitido em: ${dataHoje}`, 14, 20);
 
   // Informações do Paciente
   doc.setTextColor(30, 41, 59);
@@ -136,7 +136,7 @@ export async function exportarPlanoPDF(planoData: PlanoSemanalData, paciente: Pa
     doc.setPage(i);
     doc.setFontSize(8);
     doc.setTextColor(148, 163, 184);
-    doc.text(`Página ${i} de ${pageCount} — Marco Antonio Nutrição`, 14, 290);
+    doc.text(`Página ${i} de ${pageCount} — NutriFit Gestão Nutricional`, 14, 290);
   }
 
   const cleanName = pacienteNome.replace(/[^a-zA-Z0-9]/g, '_');
@@ -162,7 +162,7 @@ export async function exportarCadastroEPlanoPDF(planoData: PlanoSemanalData, pac
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
-  doc.text(`Dr. Marco Antonio • Nutrição Clínica Funcional | Emitido em: ${dataHoje}`, 14, 20);
+  doc.text(`NutriFit • Nutrição Clínica & Funcional | Emitido em: ${dataHoje}`, 14, 20);
 
   let currentY = 36;
 
@@ -295,7 +295,7 @@ export async function exportarCadastroEPlanoPDF(planoData: PlanoSemanalData, pac
     doc.setPage(i);
     doc.setFontSize(8);
     doc.setTextColor(148, 163, 184);
-    doc.text(`Página ${i} de ${pageCount} — Marco Antonio Nutrição`, 14, 290);
+    doc.text(`Página ${i} de ${pageCount} — NutriFit Gestão Nutricional`, 14, 290);
   }
 
   // Abre o PDF em nova aba para visualização e impressão nativa do navegador
@@ -322,7 +322,7 @@ export async function exportarPlanoDOCX(planoData: PlanoSemanalData, paciente: P
       alignment: AlignmentType.CENTER,
       children: [
         new TextRun({
-          text: `Dr. Marco Antonio • Nutrição Clínica Funcional | Emitido em: ${dataHoje}`,
+          text: `NutriFit • Nutrição Clínica & Funcional | Emitido em: ${dataHoje}`,
           italics: true,
           size: 20,
           color: '4B5563',
