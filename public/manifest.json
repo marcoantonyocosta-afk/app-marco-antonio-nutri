@@ -1,0 +1,19 @@
+{
+  "name": "Dr. Marco Antonio - Nutrição Clínica Funcional",
+  "short_name": "NutriFit",
+  "description": "Sistema de Gestão Nutricional e Prescrição de Planos Alimentares",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#059669",
+  "icons": [
+    {
+      "src": "/pwa-icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+

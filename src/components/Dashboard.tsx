@@ -14,6 +14,7 @@ import { sql } from '../lib/neon';
 import { PatientList } from './PatientList';
 import { PatientForm } from './PatientForm';
 import { PatientProfile } from './PatientProfile';
+import { PWAInstallPrompt } from './PWAInstallPrompt';
 
 interface DashboardProps {
   user: any;
@@ -183,8 +184,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             </p>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 bg-emerald-50/60 border border-emerald-100 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-700">
+          <div className="flex items-center gap-3">
+            <PWAInstallPrompt />
+            <div className="hidden sm:flex items-center gap-2 bg-emerald-50/60 border border-emerald-100 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-700">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Neon Auth Conectado</span>
             </div>

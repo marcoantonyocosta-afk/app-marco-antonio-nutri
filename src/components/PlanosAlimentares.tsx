@@ -16,10 +16,16 @@ import {
   Cookie,
   Edit3,
   Download,
-  FileType
+  FileType,
+  Printer,
+  Share2,
+  Send,
+  Mail,
+  Copy,
+  X
 } from 'lucide-react';
 import { sql } from '../lib/neon';
-import { exportarPlanoPDF, exportarPlanoDOCX } from '../utils/exportPlan';
+import { exportarPlanoPDF, exportarPlanoDOCX, exportarCadastroEPlanoPDF } from '../utils/exportPlan';
 
 export interface RefeicoesDia {
   cafe_da_manha: string[];
@@ -48,7 +54,11 @@ interface PlanosAlimentaresProps {
   patientId: string;
   patientData: {
     nome: string;
+    dataNascimento?: string;
+    idade?: string | number;
     sexo?: string;
+    whatsapp?: string;
+    email?: string;
     peso?: string;
     altura?: string;
     objetivos?: string[];
@@ -105,6 +115,11 @@ export const PlanosAlimentares: React.FC<PlanosAlimentaresProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+
+  // Modal Enviar Plano para o Paciente
+  const [isSendModalOpen, setIsSendModalOpen] = useState(false);
+  const [planToSend, setPlanToSend] = useState<PlanoSemanalData | null>(null);
+  const [copiedText, setCopiedText] = useState(false);
 
   useEffect(() => {
     setPlanos(initialPlanos);
@@ -228,10 +243,13 @@ export const PlanosAlimentares: React.FC<PlanosAlimentaresProps> = ({
   };
 
   // Exportação DOCX e PDF
-  const handleExport = async (formato: 'pdf' | 'docx', dataPlano: PlanoSemanalData, idKey = 'editor') => {
+  const handleExport = async (formato: 'pdf' | 'docx' | 'full_pdf', dataPlano: PlanoSemanalData, idKey = 'editor') => {
     setIsExporting(`${idKey}_${formato}`);
     try {
-      if (formato === 'pdf') {
+      if (formato === 'full_pdf') {
+        await exportarCadastroEPlanoPDF(dataPlano, patientData);
+        showToast('success', '🖨️ Visualização de impressão aberta em nova aba!');
+      } else if (formato === 'pdf') {
         await exportarPlanoPDF(dataPlano, patientData);
         showToast('success', '📄 Plano Alimentar em PDF baixado com sucesso!');
       } else {
@@ -240,9 +258,70 @@ export const PlanosAlimentares: React.FC<PlanosAlimentaresProps> = ({
       }
     } catch (err) {
       console.error('Erro ao exportar:', err);
-      showToast('error', 'Ocorreu um erro ao gerar o arquivo para download.');
+      showToast('error', 'Ocorreu um erro ao abrir a visualização de impressão.');
     } finally {
       setIsExporting(null);
+    }
+  };
+
+  // Geração de mensagem formatada para envio
+  const gerarMensagemResumoPlano = (plano: PlanoSemanalData) => {
+    const nome = patientData.nome || 'Paciente';
+    let msg = `Olá, ${nome}! 🥗\n\n`;
+    msg += `Aqui está o seu *Plano Alimentar Personalizado* preparado pelo *Dr. Marco Antonio*:\n\n`;
+
+    plano.plano_semanal.forEach((diaItem) => {
+      msg += `📅 *${diaItem.dia.toUpperCase()}*\n`;
+      REFEICOES_CONFIG.forEach(({ key, label }) => {
+        const opcoes = (diaItem.refeicoes as any)?.[key] || [];
+        const filtradas = opcoes.filter((o: string) => Boolean(o && o.trim()));
+        if (filtradas.length > 0) {
+          msg += `• *${label}*:\n`;
+          filtradas.forEach((op: string, idx: number) => {
+            msg += `   - Opção ${idx + 1}: ${op}\n`;
+          });
+        }
+      });
+      msg += `\n`;
+    });
+
+    msg += `Qualquer dúvida ou ajuste necessário na sua rotina, estamos à disposição! Bom foco na sua saúde e nos seus objetivos! ✨`;
+    return msg;
+  };
+
+  const handleOpenSendModal = (plano: PlanoSemanalData) => {
+    setPlanToSend(plano);
+    setIsSendModalOpen(true);
+    setCopiedText(false);
+  };
+
+  const handleSendWhatsApp = () => {
+    if (!planToSend) return;
+    const cleanPhone = (patientData.whatsapp || '').replace(/\D/g, '');
+    const mensagem = encodeURIComponent(gerarMensagemResumoPlano(planToSend));
+    const url = cleanPhone
+      ? `https://wa.me/55${cleanPhone}?text=${mensagem}`
+      : `https://wa.me/?text=${mensagem}`;
+    window.open(url, '_blank');
+  };
+
+  const handleSendEmail = () => {
+    if (!planToSend) return;
+    const email = patientData.email || '';
+    const assunto = encodeURIComponent(`Seu Plano Alimentar Personalizado - Dr. Marco Antonio Nutrição`);
+    const corpo = encodeURIComponent(gerarMensagemResumoPlano(planToSend));
+    window.open(`mailto:${email}?subject=${assunto}&body=${corpo}`);
+  };
+
+  const handleCopyText = async () => {
+    if (!planToSend) return;
+    try {
+      await navigator.clipboard.writeText(gerarMensagemResumoPlano(planToSend));
+      setCopiedText(true);
+      showToast('success', '📋 Plano copiado para a área de transferência!');
+      setTimeout(() => setCopiedText(false), 3000);
+    } catch {
+      showToast('error', 'Não foi possível copiar o texto automaticamente.');
     }
   };
 
@@ -441,12 +520,37 @@ export const PlanosAlimentares: React.FC<PlanosAlimentaresProps> = ({
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              {/* Botões de Download PDF / DOCX */}
+              {/* Botões de Enviar / Download PDF / DOCX / Visualização de Impressão */}
+              <button
+                type="button"
+                onClick={() => handleOpenSendModal(currentPlan)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer"
+                title="Mandar o plano alimentar para o paciente via WhatsApp, E-mail ou copiar"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span>Enviar para o Paciente</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={Boolean(isExporting)}
+                onClick={() => handleExport('full_pdf', currentPlan, 'editor')}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs rounded-xl transition cursor-pointer disabled:opacity-50 shadow-xs"
+                title="Abrir visualização de impressão do cadastro com plano alimentar"
+              >
+                {isExporting === 'editor_full_pdf' ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Printer className="w-3.5 h-3.5 text-emerald-700" />
+                )}
+                <span>Visualização de Impressão</span>
+              </button>
+
               <button
                 type="button"
                 disabled={Boolean(isExporting)}
                 onClick={() => handleExport('pdf', currentPlan, 'editor')}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-xs rounded-xl transition cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-xs rounded-xl transition cursor-pointer disabled:opacity-50"
                 title="Baixar Plano em PDF"
               >
                 {isExporting === 'editor_pdf' ? (
@@ -655,6 +759,32 @@ export const PlanosAlimentares: React.FC<PlanosAlimentaresProps> = ({
                         <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                           <button
                             type="button"
+                            onClick={() => handleOpenSendModal(parsedData)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs"
+                            title="Enviar Plano para o Paciente via WhatsApp / E-mail"
+                          >
+                            <Send className="w-3 h-3" />
+                            <span className="hidden md:inline">Enviar p/ Paciente</span>
+                            <span className="md:hidden">Enviar</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            disabled={Boolean(isExporting)}
+                            onClick={() => parsedData && handleExport('full_pdf', parsedData, `hist_${plano.id}`)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold transition cursor-pointer disabled:opacity-50"
+                            title="Abrir visualização de impressão (Cadastro + Plano Alimentar)"
+                          >
+                            {isExporting === `hist_${plano.id}_full_pdf` ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Printer className="w-3.5 h-3.5 text-emerald-700" />
+                            )}
+                            <span>Visualização de Impressão</span>
+                          </button>
+
+                          <button
+                            type="button"
                             disabled={Boolean(isExporting)}
                             onClick={() => parsedData && handleExport('pdf', parsedData, `hist_${plano.id}`)}
                             className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-xl text-xs font-bold transition cursor-pointer disabled:opacity-50"
@@ -754,6 +884,122 @@ export const PlanosAlimentares: React.FC<PlanosAlimentaresProps> = ({
           </div>
         )}
       </div>
+
+      {/* ======================================================== */}
+      {/* MODAL: ENVIAR PLANO ALIMENTAR PARA O PACIENTE            */}
+      {/* ======================================================== */}
+      {isSendModalOpen && planToSend && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-emerald-100 space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center">
+                  <Send className="w-5 h-5 text-emerald-700" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-gray-900 tracking-tight">
+                    Enviar Plano Alimentar
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    Paciente: <span className="font-bold text-gray-800">{patientData.nome || 'Paciente'}</span>
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSendModalOpen(false)}
+                className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Informações de Contato Cadastradas */}
+            <div className="p-3.5 bg-gray-50 rounded-2xl border border-gray-100 space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500 font-semibold">WhatsApp cadastrado:</span>
+                <span className="font-black text-gray-800">
+                  {patientData.whatsapp || 'Não informado'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500 font-semibold">E-mail cadastrado:</span>
+                <span className="font-black text-gray-800">
+                  {patientData.email || 'Não informado'}
+                </span>
+              </div>
+            </div>
+
+            {/* Ações de Envio Rápido */}
+            <div className="space-y-3">
+              <span className="text-xs font-bold text-gray-700 uppercase tracking-wider block">
+                Escolha o canal de envio:
+              </span>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Botão WhatsApp */}
+                <button
+                  type="button"
+                  onClick={handleSendWhatsApp}
+                  className="flex items-center justify-center gap-2 p-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-2xl shadow-md shadow-emerald-600/20 transition cursor-pointer"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>Enviar por WhatsApp</span>
+                </button>
+
+                {/* Botão E-mail */}
+                <button
+                  type="button"
+                  onClick={handleSendEmail}
+                  className="flex items-center justify-center gap-2 p-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-2xl shadow-md shadow-blue-600/20 transition cursor-pointer"
+                >
+                  <Mail className="w-4 h-4" />
+                  <span>Enviar por E-mail</span>
+                </button>
+              </div>
+
+              {/* Botão Copiar Texto Formatado */}
+              <button
+                type="button"
+                onClick={handleCopyText}
+                className="w-full flex items-center justify-center gap-2 p-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-2xl transition cursor-pointer"
+              >
+                {copiedText ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span className="text-emerald-700">Texto do plano copiado!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    <span>Copiar Texto Completo do Cardápio</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Prévia do Texto */}
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">
+                Prévia da Mensagem:
+              </label>
+              <div className="max-h-36 overflow-y-auto p-3 bg-gray-50 border border-gray-200 rounded-xl text-[11px] text-gray-700 whitespace-pre-line font-sans scrollbar-thin">
+                {gerarMensagemResumoPlano(planToSend)}
+              </div>
+            </div>
+
+            <div className="pt-2 flex items-center justify-end">
+              <button
+                type="button"
+                onClick={() => setIsSendModalOpen(false)}
+                className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl transition cursor-pointer"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1314,7 +1314,11 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({ patientId, onBac
           initialPlanos={planos}
           patientData={{
             nome,
+            dataNascimento,
+            idade: dataNascimento ? (calcularIdade(dataNascimento) ?? undefined) : undefined,
             sexo,
+            whatsapp,
+            email,
             peso,
             altura,
             objetivos,
