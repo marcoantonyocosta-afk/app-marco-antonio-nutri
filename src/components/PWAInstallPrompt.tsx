@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Download, Monitor, Smartphone, X, CheckCircle2, Copy, Check, Sparkles } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -121,10 +122,10 @@ export const PWAInstallPrompt: React.FC = () => {
         <span>Instalar Aplicativo</span>
       </button>
 
-      {/* Modal Simplificado & Direto ao Ponto */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-emerald-100 space-y-5">
+      {/* Modal Simplificado & Direto ao Ponto renderizado via Portal no body */}
+      {showModal && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-emerald-100 space-y-5 relative my-auto">
             
             {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
@@ -253,7 +254,8 @@ export const PWAInstallPrompt: React.FC = () => {
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
