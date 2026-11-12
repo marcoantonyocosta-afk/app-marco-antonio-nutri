@@ -7,7 +7,8 @@ import {
   LayoutDashboard, 
   ChevronRight, 
   Activity,
-  Sparkles
+  Sparkles,
+  Dumbbell
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { sql } from '../lib/neon';
@@ -33,8 +34,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const [pacientesSemRetorno, setPacientesSemRetorno] = useState<InactivePatient[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Navegação: 'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil'
-  const [currentView, setCurrentView] = useState<'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil'>('dashboard');
+  // Navegação: 'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'sugestao_treino'
+  const [currentView, setCurrentView] = useState<'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'sugestao_treino'>('dashboard');
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
 
   const loadDashboardData = async () => {
@@ -106,6 +107,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         return 'Novo Paciente';
       case 'pacientes_perfil':
         return 'Perfil do Paciente';
+      case 'sugestao_treino':
+        return 'Sugestão de Treino';
     }
   };
 
@@ -137,13 +140,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             <button
               onClick={() => setCurrentView('pacientes_list')}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                currentView !== 'dashboard'
+                currentView !== 'dashboard' && currentView !== 'sugestao_treino'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
                   : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
               }`}
             >
               <Users className="w-5 h-5" />
               <span>Pacientes</span>
+            </button>
+
+            <button
+              onClick={() => setCurrentView('sugestao_treino')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                currentView === 'sugestao_treino'
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                  : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
+              }`}
+            >
+              <Dumbbell className="w-5 h-5" />
+              <span>Sugestão de Treino</span>
             </button>
           </nav>
         </div>
@@ -225,6 +240,45 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                 setCurrentView('pacientes_perfil');
               }}
             />
+          )}
+
+          {/* View 5: Sugestão de Treino */}
+          {currentView === 'sugestao_treino' && (
+            <div className="space-y-6">
+              {/* Header da seção */}
+              <div className="bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 rounded-3xl p-8 text-white shadow-xl shadow-emerald-900/10 relative overflow-hidden">
+                <div className="relative z-10 max-w-2xl">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-xs font-medium text-emerald-100 mb-4">
+                    <Dumbbell className="w-3.5 h-3.5 text-emerald-300" />
+                    <span>Módulo de Treino</span>
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">
+                    Sugestão de Treino
+                  </h2>
+                  <p className="text-emerald-100/90 text-sm leading-relaxed">
+                    Em breve você poderá gerar sugestões de treino personalizadas para seus pacientes com inteligência artificial.
+                  </p>
+                </div>
+                <div className="absolute -right-8 -bottom-12 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none" />
+              </div>
+
+              {/* Card Em Desenvolvimento */}
+              <div className="bg-white rounded-3xl border border-emerald-100 shadow-sm p-12 flex flex-col items-center justify-center text-center gap-6">
+                <div className="w-20 h-20 rounded-3xl bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+                  <Dumbbell className="w-10 h-10 text-emerald-500" />
+                </div>
+                <div className="space-y-2 max-w-md">
+                  <h3 className="text-xl font-bold text-gray-900">Funcionalidade em Desenvolvimento</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">
+                    Este módulo permitirá criar planos de treino complementares à nutrição, integrados ao perfil de cada paciente com sugestões geradas por IA.
+                  </p>
+                </div>
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-full text-xs font-semibold text-emerald-700">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Em breve disponível</span>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* View 4: Dashboard Principal (Prompt 3) */}
