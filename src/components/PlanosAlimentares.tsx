@@ -728,93 +728,120 @@ export const PlanosAlimentares: React.FC<PlanosAlimentaresProps> = ({
                 <div key={plano.id} className="transition">
                   <div
                     onClick={() => setSelectedHistorico(isExpanded ? null : plano)}
-                    className="p-6 hover:bg-emerald-50/40 flex items-center justify-between cursor-pointer transition"
+                    className="p-4 sm:p-5 md:p-6 hover:bg-emerald-50/40 cursor-pointer transition space-y-3.5"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
-                        <FileText className="w-5 h-5 text-emerald-700" />
-                      </div>
-                      <div>
-                        <span className="text-sm font-bold text-gray-900 block">
-                          Plano Alimentar Semanal
-                        </span>
-                        <span className="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
-                          <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                          <span>{new Date(plano.created_at).toLocaleDateString('pt-BR')}</span>
-                          <span>•</span>
-                          <Clock className="w-3.5 h-3.5 text-gray-400" />
-                          <span>
-                            {new Date(plano.created_at).toLocaleTimeString('pt-BR', {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
+                    {/* Top row: Ícone, Título, Data e Botão de Recolher/Visualizar */}
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                          <FileText className="w-5 h-5 text-emerald-700" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-sm font-bold text-gray-900 block truncate">
+                            Plano Alimentar Semanal
                           </span>
-                        </span>
+                          <span className="text-xs text-gray-500 flex items-center flex-wrap gap-1.5 mt-0.5">
+                            <span className="inline-flex items-center gap-1">
+                              <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                              <span>{new Date(plano.created_at).toLocaleDateString('pt-BR')}</span>
+                            </span>
+                            <span className="text-gray-300">•</span>
+                            <span className="inline-flex items-center gap-1">
+                              <Clock className="w-3.5 h-3.5 text-gray-400" />
+                              <span>
+                                {new Date(plano.created_at).toLocaleTimeString('pt-BR', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </span>
+                            </span>
+                          </span>
+                        </div>
                       </div>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedHistorico(isExpanded ? null : plano);
+                        }}
+                        className="inline-flex items-center justify-center gap-1 h-8 px-2.5 text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:bg-emerald-100/60 rounded-lg transition shrink-0"
+                      >
+                        <span>{isExpanded ? 'Recolher' : 'Visualizar'}</span>
+                        <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
+                      </button>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      {/* Botões de Download PDF / DOCX para histórico */}
+                    {/* Barra de Ações — layout responsivo para celular */}
+                    <div
+                      className="pt-3 border-t border-gray-100 space-y-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       {parsedData?.plano_semanal && (
-                        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                        <>
+                          {/* Linha 1: Enviar p/ Paciente (largura total) */}
                           <button
                             type="button"
                             onClick={() => handleOpenSendModal(parsedData)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs"
+                            className="w-full inline-flex items-center justify-center gap-2 h-10 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-semibold transition cursor-pointer shadow-sm active:scale-[0.98]"
                             title="Enviar Plano para o Paciente via WhatsApp / E-mail"
                           >
-                            <Send className="w-3 h-3" />
-                            <span className="hidden md:inline">Enviar p/ Paciente</span>
-                            <span className="md:hidden">Enviar</span>
+                            <Send className="w-3.5 h-3.5 shrink-0" />
+                            <span>Enviar p/ Paciente</span>
                           </button>
 
+                          {/* Linha 2: Visualização de Impressão (largura total) */}
                           <button
                             type="button"
                             disabled={Boolean(isExporting)}
                             onClick={() => parsedData && handleExport('full_pdf', parsedData, `hist_${plano.id}`)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold transition cursor-pointer disabled:opacity-50"
+                            className="w-full inline-flex items-center justify-center gap-2 h-10 px-4 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-300 hover:border-emerald-400 rounded-xl text-xs font-semibold transition cursor-pointer disabled:opacity-50 active:scale-[0.98] shadow-sm"
                             title="Abrir visualização de impressão (Cadastro + Plano Alimentar)"
                           >
                             {isExporting === `hist_${plano.id}_full_pdf` ? (
-                              <Loader2 className="w-3 h-3 animate-spin" />
+                              <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
                             ) : (
-                              <Printer className="w-3.5 h-3.5 text-emerald-700" />
+                              <Printer className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
                             )}
                             <span>Visualização de Impressão</span>
                           </button>
 
-                          <button
-                            type="button"
-                            disabled={Boolean(isExporting)}
-                            onClick={() => parsedData && handleExport('pdf', parsedData, `hist_${plano.id}`)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-xl text-xs font-bold transition cursor-pointer disabled:opacity-50"
-                            title="Baixar PDF"
-                          >
-                            {isExporting === `hist_${plano.id}_pdf` ? (
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                            ) : (
-                              <Download className="w-3 h-3" />
-                            )}
-                            <span>PDF</span>
-                          </button>
+                          {/* Linha 3: PDF + DOCX lado a lado */}
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              type="button"
+                              disabled={Boolean(isExporting)}
+                              onClick={() => parsedData && handleExport('pdf', parsedData, `hist_${plano.id}`)}
+                              className="inline-flex items-center justify-center gap-1.5 h-10 px-3 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 hover:border-red-300 rounded-xl text-xs font-semibold transition cursor-pointer disabled:opacity-50 active:scale-[0.98] shadow-sm"
+                              title="Baixar PDF"
+                            >
+                              {isExporting === `hist_${plano.id}_pdf` ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
+                              ) : (
+                                <Download className="w-3.5 h-3.5 shrink-0" />
+                              )}
+                              <span>↓ PDF</span>
+                            </button>
 
-                          <button
-                            type="button"
-                            disabled={Boolean(isExporting)}
-                            onClick={() => parsedData && handleExport('docx', parsedData, `hist_${plano.id}`)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition cursor-pointer disabled:opacity-50"
-                            title="Baixar DOCX"
-                          >
-                            {isExporting === `hist_${plano.id}_docx` ? (
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                            ) : (
-                              <FileType className="w-3 h-3" />
-                            )}
-                            <span>DOCX</span>
-                          </button>
-                        </div>
+                            <button
+                              type="button"
+                              disabled={Boolean(isExporting)}
+                              onClick={() => parsedData && handleExport('docx', parsedData, `hist_${plano.id}`)}
+                              className="inline-flex items-center justify-center gap-1.5 h-10 px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 hover:border-blue-300 rounded-xl text-xs font-semibold transition cursor-pointer disabled:opacity-50 active:scale-[0.98] shadow-sm"
+                              title="Baixar DOCX"
+                            >
+                              {isExporting === `hist_${plano.id}_docx` ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
+                              ) : (
+                                <FileType className="w-3.5 h-3.5 shrink-0" />
+                              )}
+                              <span>↓ DOCX</span>
+                            </button>
+                          </div>
+                        </>
                       )}
 
+                      {/* Linha final: Carregar no Editor (largura total) */}
                       <button
                         type="button"
                         onClick={(e) => {
@@ -825,15 +852,10 @@ export const PlanosAlimentares: React.FC<PlanosAlimentaresProps> = ({
                             window.scrollTo({ top: 400, behavior: 'smooth' });
                           }
                         }}
-                        className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold transition cursor-pointer"
+                        className="w-full inline-flex items-center justify-center h-10 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 hover:border-emerald-300 rounded-xl text-xs font-semibold transition cursor-pointer active:scale-[0.98] shadow-sm"
                       >
                         Carregar no Editor
                       </button>
-
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
-                        <span>{isExpanded ? 'Recolher' : 'Visualizar'}</span>
-                        <ChevronRight className={`w-4 h-4 transition ${isExpanded ? 'rotate-90' : ''}`} />
-                      </div>
                     </div>
                   </div>
 
