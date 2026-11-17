@@ -133,7 +133,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       case 'pacientes_perfil':
         return 'Perfil do Paciente';
       case 'sugestao_treino':
-        return 'Sugestão de Treino';
+        return 'Treinos (Musculação / Natação / Corrida)';
     }
   };
 
@@ -165,13 +165,37 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             <button
               onClick={() => setCurrentView('pacientes_list')}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                currentView !== 'dashboard'
+                currentView === 'pacientes_list' || currentView === 'pacientes_novo' || (currentView === 'pacientes_perfil' && defaultProfileSection !== 'treino')
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
                   : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
               }`}
             >
               <Users className="w-5 h-5" />
               <span>Pacientes</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setCurrentView('sugestao_treino');
+                carregarPacientesTreino();
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                currentView === 'sugestao_treino' || (currentView === 'pacientes_perfil' && defaultProfileSection === 'treino')
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                  : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
+              }`}
+            >
+              <Dumbbell className="w-5 h-5" />
+              <div className="text-left flex-1 min-w-0">
+                <span className="block truncate">Treinos</span>
+                <span className={`block text-[10px] font-normal truncate ${
+                  currentView === 'sugestao_treino' || (currentView === 'pacientes_perfil' && defaultProfileSection === 'treino')
+                    ? 'text-emerald-100'
+                    : 'text-gray-400'
+                }`}>
+                  Musculação, Natação etc.
+                </span>
+              </div>
             </button>
           </nav>
         </div>
