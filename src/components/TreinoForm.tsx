@@ -1215,86 +1215,86 @@ export const TreinoForm: React.FC<TreinoFormProps> = ({
 
                       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2.5">
                         <div className="col-span-2 sm:col-span-3 lg:col-span-2 space-y-1">
-                          <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider block">Exercício</label>
+                          <label className="text-[10px] font-bold text-gray-700 uppercase tracking-wider block">Exercício</label>
                           <input
                             type="text"
                             list="lista-opcoes-exercicios"
                             value={ex.nome}
                             onChange={(e) => handleExercicioChange(activeDayIndex, exIdx, 'nome', e.target.value)}
-                            placeholder="Selecione ou digite..."
-                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white rounded-xl text-xs font-semibold outline-none"
+                            placeholder="Digite ou escolha..."
+                            className="w-full px-3 py-2 bg-white border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl text-xs font-semibold text-gray-900 outline-none transition"
                           />
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider block">Séries</label>
+                          <label className="text-[10px] font-bold text-gray-700 uppercase tracking-wider block">Séries</label>
                           <input
                             type="text"
                             list="lista-opcoes-series"
                             value={ex.series}
                             onChange={(e) => handleExercicioChange(activeDayIndex, exIdx, 'series', e.target.value)}
-                            placeholder="3, 4..."
-                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white rounded-xl text-xs outline-none"
+                            placeholder="Ex: 3, 4"
+                            className="w-full px-3 py-2 bg-white border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl text-xs font-medium text-gray-800 outline-none transition"
                           />
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider block">Reps</label>
+                          <label className="text-[10px] font-bold text-gray-700 uppercase tracking-wider block">Reps</label>
                           <input
                             type="text"
                             list="lista-opcoes-reps"
                             value={ex.reps}
                             onChange={(e) => handleExercicioChange(activeDayIndex, exIdx, 'reps', e.target.value)}
-                            placeholder="10-12..."
-                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white rounded-xl text-xs outline-none"
+                            placeholder="Ex: 10-12"
+                            className="w-full px-3 py-2 bg-white border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl text-xs font-medium text-gray-800 outline-none transition"
                           />
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider block">Distância</label>
+                          <label className="text-[10px] font-bold text-gray-700 uppercase tracking-wider block">Distância</label>
                           <input
                             type="text"
                             list="lista-opcoes-distancia"
                             value={ex.distancia}
                             onChange={(e) => handleExercicioChange(activeDayIndex, exIdx, 'distancia', e.target.value)}
-                            placeholder="100m, -"
-                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white rounded-xl text-xs outline-none"
+                            placeholder="Ex: 100m, -"
+                            className="w-full px-3 py-2 bg-white border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl text-xs font-medium text-gray-800 outline-none transition"
                           />
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider block">Carga</label>
+                          <label className="text-[10px] font-bold text-gray-700 uppercase tracking-wider block">Carga</label>
                           <input
                             type="text"
                             list="lista-opcoes-carga"
                             value={ex.carga}
                             onChange={(e) => handleExercicioChange(activeDayIndex, exIdx, 'carga', e.target.value)}
-                            placeholder="20kg, Leve..."
-                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white rounded-xl text-xs outline-none"
+                            placeholder="Ex: 20kg, Leve"
+                            className="w-full px-3 py-2 bg-white border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl text-xs font-medium text-gray-800 outline-none transition"
                           />
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider block">Intensidade</label>
+                          <label className="text-[10px] font-bold text-gray-700 uppercase tracking-wider block">Intensidade</label>
                           <input
                             type="text"
                             list="lista-opcoes-intensidade"
                             value={ex.intensidade}
                             onChange={(e) => handleExercicioChange(activeDayIndex, exIdx, 'intensidade', e.target.value)}
-                            placeholder="RPE 8..."
-                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white rounded-xl text-xs outline-none"
+                            placeholder="Ex: RPE 8"
+                            className="w-full px-3 py-2 bg-white border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl text-xs font-medium text-gray-800 outline-none transition"
                           />
                         </div>
 
                         <div className="col-span-2 sm:col-span-1 space-y-1">
-                          <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider block">Descanso</label>
+                          <label className="text-[10px] font-bold text-gray-700 uppercase tracking-wider block">Descanso</label>
                           <input
                             type="text"
                             list="lista-opcoes-descanso"
                             value={ex.descanso}
                             onChange={(e) => handleExercicioChange(activeDayIndex, exIdx, 'descanso', e.target.value)}
-                            placeholder="60s..."
-                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white rounded-xl text-xs outline-none"
+                            placeholder="Ex: 60s"
+                            className="w-full px-3 py-2 bg-white border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl text-xs font-medium text-gray-800 outline-none transition"
                           />
                         </div>
                       </div>
@@ -1308,7 +1308,7 @@ export const TreinoForm: React.FC<TreinoFormProps> = ({
                           value={ex.tecnica}
                           onChange={(e) => handleExercicioChange(activeDayIndex, exIdx, 'tecnica', e.target.value)}
                           placeholder="Execução controlada, respiração correta, cadência..."
-                          className="w-full px-3 py-2 bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white rounded-xl text-xs outline-none"
+                          className="w-full px-3 py-2 bg-white border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl text-xs text-gray-700 outline-none transition"
                         />
                       </div>
                     </div>
