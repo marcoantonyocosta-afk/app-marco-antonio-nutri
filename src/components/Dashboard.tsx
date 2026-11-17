@@ -165,28 +165,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             <button
               onClick={() => setCurrentView('pacientes_list')}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                currentView !== 'dashboard' && currentView !== 'sugestao_treino'
+                currentView !== 'dashboard'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
                   : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
               }`}
             >
               <Users className="w-5 h-5" />
               <span>Pacientes</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setCurrentView('sugestao_treino');
-                carregarPacientesTreino();
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                currentView === 'sugestao_treino'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
-                  : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
-              }`}
-            >
-              <Dumbbell className="w-5 h-5" />
-              <span>Sugestão de Treino</span>
             </button>
           </nav>
         </div>
