@@ -543,24 +543,22 @@ export const SugestaoTreino: React.FC<SugestaoTreinoProps> = ({
 
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           {/* Botão em destaque: Plano de Treino Manual */}
-          {!currentPlan && (
-            <button
-              type="button"
-              disabled={isGenerating}
-              onClick={() => { setCurrentPlan(criarPlanoManual()); setActiveDayIndex(0); }}
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-5 py-3 bg-white hover:bg-emerald-50 text-emerald-800 border-2 border-emerald-300 hover:border-emerald-500 font-bold text-xs rounded-2xl shadow-sm transition active:scale-95 cursor-pointer disabled:opacity-50"
-            >
-              <Edit3 className="w-4 h-4 text-emerald-600" />
-              <span>Plano de treino Manual</span>
-            </button>
-          )}
+          <button
+            type="button"
+            disabled={isGenerating}
+            onClick={() => { setCurrentPlan(criarPlanoManual()); setActiveDayIndex(0); }}
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-2 border-emerald-400 font-extrabold text-xs sm:text-sm rounded-2xl shadow-sm transition active:scale-95 cursor-pointer disabled:opacity-50"
+          >
+            <Edit3 className="w-4 h-4 text-emerald-700" />
+            <span>Plano de treino Manual</span>
+          </button>
 
           {/* Botão em destaque: Gerar Plano com IA com loading e prevenção de duplo clique */}
           <button
             type="button"
             disabled={isGenerating}
             onClick={handleGerarTreinoIA}
-            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2.5 px-6 py-3 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs sm:text-sm rounded-2xl shadow-lg shadow-emerald-600/30 transition transform active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs sm:text-sm rounded-2xl shadow-lg shadow-emerald-600/30 transition transform active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isGenerating ? (
               <>
