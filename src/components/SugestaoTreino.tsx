@@ -101,6 +101,66 @@ const MODALIDADES_COMUNS = [
   'Repouso / Descanso',
 ];
 
+// Listas de opções para seleção múltipla e rápida (dropdowns editáveis / datalist)
+const OPCOES_EXERCICIOS = [
+  // Musculação - Peito e Tríceps
+  'Supino Reto com Barra',
+  'Supino Inclinado com Halteres',
+  'Crucifixo no Cabo',
+  'Crossover Polia Alta',
+  'Tríceps Corda',
+  'Tríceps Pulley',
+  'Tríceps Testa',
+  'Flexão de Braço (Push-up)',
+  // Musculação - Costas e Bíceps
+  'Puxada Frontal Aberta',
+  'Remada Baixa Triângulo',
+  'Remada Curvada com Barra',
+  'Pulldown na Polia',
+  'Rosca Direta com Barra W',
+  'Rosca Martelo com Halteres',
+  'Rosca Scott na Máquina',
+  // Musculação - Pernas e Glúteos
+  'Agachamento Livre',
+  'Leg Press 45°',
+  'Cadeira Extensora',
+  'Mesa Flexora',
+  'Stiff com Halteres',
+  'Elevação Pélvica',
+  'Afundo / Passada com Halteres',
+  'Panturrilha em Pé na Máquina',
+  // Musculação - Ombros e Abdômen
+  'Desenvolvimento com Halteres',
+  'Elevação Lateral com Halteres',
+  'Elevação Frontal',
+  'Prancha Abdominal',
+  'Abdominal Supra no Solo',
+  // Natação
+  'Aquecimento 200m Crawl',
+  'Série de 50m Crawl (Velocidade)',
+  'Série de 100m Crawl (Ritmo moderado)',
+  '50m Costas',
+  '50m Peito',
+  'Tiro de 25m Máximo esforço',
+  'Educativo de Pernada com Prancha (100m)',
+  'Soltura 100m Nado Livre',
+  // Corrida & Cardio
+  'Caminhada Rápida na Esteira',
+  'Trote Leve (Z2)',
+  'Corrida Contínua 5km',
+  'Tiros de 400m em ritmo forte',
+  'HIIT Esteira (30s forte x 30s fraco)',
+  'Bike Ergométrica ritmo moderado',
+  'Alongamento e Mobilidade Geral'
+];
+
+const OPCOES_SERIES = ['1', '2', '3', '4', '5', '6', '8', '10', '12'];
+const OPCOES_REPS = ['-', '6-8', '8-10', '10-12', '12-15', '15-20', '20-25', 'Até a falha'];
+const OPCOES_DISTANCIA = ['-', '25m', '50m', '100m', '200m', '400m', '500m', '1km', '2km', '3km', '5km', '10km'];
+const OPCOES_CARGA = ['Sem carga', 'Peso Corporal', 'Leve', 'Moderada', 'Moderada / Alta', 'Pesada', '60% 1RM', '70% 1RM', '80% 1RM', '5kg', '10kg', '15kg', '20kg', '25kg', '30kg', '40kg', '50kg'];
+const OPCOES_INTENSIDADE = ['Leve (Z1)', 'Moderada (Z2 / RPE 6-7)', 'Moderada / Alta (RPE 7-8)', 'Alta (Z4 / RPE 8-9)', 'Máxima (Z5 / RPE 10)'];
+const OPCOES_DESCANSO = ['30s', '45s', '60s', '75s', '90s', '2min', '2min30s', '3min'];
+
 function getTipoColor(tipo: string) {
   const t = (tipo || '').toLowerCase();
   if (t.includes('natação') || t.includes('natacao')) return 'text-cyan-700 bg-cyan-50 border-cyan-200';
@@ -708,102 +768,109 @@ export const SugestaoTreino: React.FC<SugestaoTreinoProps> = ({
                       </button>
                     </div>
 
-                    {/* Grade de Campos Editáveis */}
+                    {/* Grade de Campos Múltipla Escolha / Editáveis */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2.5">
-                      {/* Campo 1: Exercício */}
+                      {/* Campo 1: Exercício com seleção rápida ou livre */}
                       <div className="col-span-2 sm:col-span-3 lg:col-span-2 space-y-1">
                         <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider block">
                           Exercício
                         </label>
                         <input
                           type="text"
+                          list="opcoes-exercicios-list"
                           value={ex.nome}
                           onChange={e => handleExercicioChange(activeDayIndex, exIdx, 'nome', e.target.value)}
-                          placeholder="Ex: Supino Reto / 100m Crawl"
+                          placeholder="Selecione ou digite..."
                           className="w-full px-3 py-2 bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white rounded-xl text-xs font-semibold text-gray-900 outline-none transition"
                         />
                       </div>
 
-                      {/* Campo 2: Séries */}
+                      {/* Campo 2: Séries com seleção múltipla */}
                       <div className="space-y-1">
                         <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider block">
                           Séries
                         </label>
                         <input
                           type="text"
+                          list="opcoes-series-list"
                           value={ex.series}
                           onChange={e => handleExercicioChange(activeDayIndex, exIdx, 'series', e.target.value)}
-                          placeholder="Ex: 4"
+                          placeholder="Ex: 3, 4"
                           className="w-full px-3 py-2 bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white rounded-xl text-xs text-gray-800 outline-none transition"
                         />
                       </div>
 
-                      {/* Campo 3: Reps */}
+                      {/* Campo 3: Reps com seleção múltipla */}
                       <div className="space-y-1">
                         <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider block">
                           Reps
                         </label>
                         <input
                           type="text"
+                          list="opcoes-reps-list"
                           value={ex.reps}
                           onChange={e => handleExercicioChange(activeDayIndex, exIdx, 'reps', e.target.value)}
-                          placeholder="Ex: 10-12 ou -"
+                          placeholder="Ex: 10-12"
                           className="w-full px-3 py-2 bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white rounded-xl text-xs text-gray-800 outline-none transition"
                         />
                       </div>
 
-                      {/* Campo 4: Distância */}
+                      {/* Campo 4: Distância com seleção múltipla */}
                       <div className="space-y-1">
                         <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider block">
                           Distância
                         </label>
                         <input
                           type="text"
+                          list="opcoes-distancia-list"
                           value={ex.distancia}
                           onChange={e => handleExercicioChange(activeDayIndex, exIdx, 'distancia', e.target.value)}
-                          placeholder="Ex: 100m / 5km / -"
+                          placeholder="Ex: 100m, -"
                           className="w-full px-3 py-2 bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white rounded-xl text-xs text-gray-800 outline-none transition"
                         />
                       </div>
 
-                      {/* Campo 5: Carga */}
+                      {/* Campo 5: Carga com seleção múltipla */}
                       <div className="space-y-1">
                         <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider block">
                           Carga
                         </label>
                         <input
                           type="text"
+                          list="opcoes-carga-list"
                           value={ex.carga}
                           onChange={e => handleExercicioChange(activeDayIndex, exIdx, 'carga', e.target.value)}
-                          placeholder="Ex: 20kg / 70% / -"
+                          placeholder="Ex: Moderada, 20kg"
                           className="w-full px-3 py-2 bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white rounded-xl text-xs text-gray-800 outline-none transition"
                         />
                       </div>
 
-                      {/* Campo 6: Intensidade */}
+                      {/* Campo 6: Intensidade com seleção múltipla */}
                       <div className="space-y-1">
                         <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider block">
                           Intensidade
                         </label>
                         <input
                           type="text"
+                          list="opcoes-intensidade-list"
                           value={ex.intensidade}
                           onChange={e => handleExercicioChange(activeDayIndex, exIdx, 'intensidade', e.target.value)}
-                          placeholder="Ex: Moderada / RPE 8"
+                          placeholder="Ex: RPE 7-8"
                           className="w-full px-3 py-2 bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white rounded-xl text-xs text-gray-800 outline-none transition"
                         />
                       </div>
 
-                      {/* Campo 7: Descanso */}
+                      {/* Campo 7: Descanso com seleção múltipla */}
                       <div className="col-span-2 sm:col-span-1 space-y-1">
                         <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider block">
                           Descanso
                         </label>
                         <input
                           type="text"
+                          list="opcoes-descanso-list"
                           value={ex.descanso}
                           onChange={e => handleExercicioChange(activeDayIndex, exIdx, 'descanso', e.target.value)}
-                          placeholder="Ex: 60s / 90s"
+                          placeholder="Ex: 60s, 90s"
                           className="w-full px-3 py-2 bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white rounded-xl text-xs text-gray-800 outline-none transition"
                         />
                       </div>
@@ -1111,6 +1178,35 @@ export const SugestaoTreino: React.FC<SugestaoTreinoProps> = ({
           </div>
         </div>
       )}
+
+      {/* Datalists para Múltipla Escolha e Seleção Rápida */}
+      <datalist id="opcoes-exercicios-list">
+        {OPCOES_EXERCICIOS.map(op => <option key={op} value={op} />)}
+      </datalist>
+
+      <datalist id="opcoes-series-list">
+        {OPCOES_SERIES.map(op => <option key={op} value={op} />)}
+      </datalist>
+
+      <datalist id="opcoes-reps-list">
+        {OPCOES_REPS.map(op => <option key={op} value={op} />)}
+      </datalist>
+
+      <datalist id="opcoes-distancia-list">
+        {OPCOES_DISTANCIA.map(op => <option key={op} value={op} />)}
+      </datalist>
+
+      <datalist id="opcoes-carga-list">
+        {OPCOES_CARGA.map(op => <option key={op} value={op} />)}
+      </datalist>
+
+      <datalist id="opcoes-intensidade-list">
+        {OPCOES_INTENSIDADE.map(op => <option key={op} value={op} />)}
+      </datalist>
+
+      <datalist id="opcoes-descanso-list">
+        {OPCOES_DESCANSO.map(op => <option key={op} value={op} />)}
+      </datalist>
     </div>
   );
 };
