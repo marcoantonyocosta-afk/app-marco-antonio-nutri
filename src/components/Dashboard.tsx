@@ -15,6 +15,8 @@ import { sql } from '../lib/neon';
 import { PatientList } from './PatientList';
 import { PatientForm } from './PatientForm';
 import { PatientProfile } from './PatientProfile';
+import { TreinoList } from './TreinoList';
+import { TreinoForm } from './TreinoForm';
 import { PWAInstallPrompt } from './PWAInstallPrompt';
 
 interface DashboardProps {
@@ -34,13 +36,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const [pacientesSemRetorno, setPacientesSemRetorno] = useState<InactivePatient[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Navegação: 'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'sugestao_treino'
-  const [currentView, setCurrentView] = useState<'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'sugestao_treino'>('dashboard');
+  // Navegação: 'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'treinos_list' | 'treinos_novo'
+  const [currentView, setCurrentView] = useState<'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'treinos_list' | 'treinos_novo'>('dashboard');
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
+  const [selectedTreinoId, setSelectedTreinoId] = useState<string | null>(null);
   const [defaultProfileSection, setDefaultProfileSection] = useState<'dados' | 'consultas' | 'planos' | 'treino'>('dados');
-  const [treinoSearch, setTreinoSearch] = useState('');
-  const [pacientesParaTreino, setPacientesParaTreino] = useState<any[]>([]);
-  const [loadingTreinoPacientes, setLoadingTreinoPacientes] = useState(false);
 
   const loadDashboardData = async () => {
     try {
@@ -102,26 +102,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     setCurrentView('pacientes_perfil');
   };
 
-  const carregarPacientesTreino = async () => {
-    try {
-      setLoadingTreinoPacientes(true);
-      const res = await sql.query(
-        `SELECT p.id, p.nome, p.objetivos, p.objetivo_texto, p.nivel_atividade, p.peso_inicial, p.altura,
-                (SELECT COUNT(*) FROM public.planos_alimentares pa WHERE pa.paciente_id = p.id) as total_planos,
-                (SELECT COUNT(*) FROM public.planos_treino pt WHERE pt.paciente_id = p.id) as total_treinos
-         FROM public.pacientes p
-         WHERE p.nutricionista_id = $1
-         ORDER BY p.created_at DESC`,
-        [user?.id]
-      );
-      setPacientesParaTreino(res);
-    } catch (err) {
-      console.error('Erro ao carregar pacientes para treino:', err);
-    } finally {
-      setLoadingTreinoPacientes(false);
-    }
-  };
-
   const getHeaderTitle = () => {
     switch (currentView) {
       case 'dashboard':
@@ -132,8 +112,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         return 'Novo Paciente';
       case 'pacientes_perfil':
         return 'Perfil do Paciente';
-      case 'sugestao_treino':
-        return 'Treinos (Musculação / Natação / Corrida)';
+      case 'treinos_list':
+        return 'Gestão de Treinos';
+      case 'treinos_novo':
+        return selectedTreinoId ? 'Editar Ficha de Treino' : 'Novo Treino';
     }
   };
 
@@ -165,7 +147,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             <button
               onClick={() => setCurrentView('pacientes_list')}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                currentView === 'pacientes_list' || currentView === 'pacientes_novo' || (currentView === 'pacientes_perfil' && defaultProfileSection !== 'treino')
+                currentView === 'pacientes_list' || currentView === 'pacientes_novo' || currentView === 'pacientes_perfil'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
                   : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
               }`}
@@ -176,26 +158,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
             <button
               onClick={() => {
-                setCurrentView('sugestao_treino');
-                carregarPacientesTreino();
+                setSelectedTreinoId(null);
+                setCurrentView('treinos_list');
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                currentView === 'sugestao_treino' || (currentView === 'pacientes_perfil' && defaultProfileSection === 'treino')
+                currentView === 'treinos_list' || currentView === 'treinos_novo'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
                   : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
               }`}
             >
               <Dumbbell className="w-5 h-5" />
-              <div className="text-left flex-1 min-w-0">
-                <span className="block truncate">Treinos</span>
-                <span className={`block text-[10px] font-normal truncate ${
-                  currentView === 'sugestao_treino' || (currentView === 'pacientes_perfil' && defaultProfileSection === 'treino')
-                    ? 'text-emerald-100'
-                    : 'text-gray-400'
-                }`}>
-                  Musculação, Natação etc.
-                </span>
-              </div>
+              <span>Treinos</span>
             </button>
           </nav>
         </div>
@@ -265,12 +238,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               patientId={selectedPatientId}
               defaultSection={defaultProfileSection}
               onBack={() => {
-                if (defaultProfileSection === 'treino') {
-                  setCurrentView('sugestao_treino');
-                  carregarPacientesTreino();
-                } else {
-                  setCurrentView('pacientes_list');
-                }
+                setCurrentView('pacientes_list');
               }}
             />
           )}
@@ -288,138 +256,35 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             />
           )}
 
-          {/* View 5: Sugestão de Treino Integrada aos Pacientes */}
-          {currentView === 'sugestao_treino' && (
-            <div className="space-y-6 animate-in fade-in">
-              {/* Header da seção */}
-              <div className="bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-emerald-900/10 relative overflow-hidden">
-                <div className="relative z-10 max-w-2xl">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-xs font-medium text-emerald-100 mb-3">
-                    <Dumbbell className="w-3.5 h-3.5 text-emerald-300" />
-                    <span>Módulo de Treino & Performance</span>
-                  </div>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">
-                    Sugestão de Treino por Paciente
-                  </h2>
-                  <p className="text-emerald-100/90 text-sm leading-relaxed">
-                    Selecione um paciente para prescrever e acompanhar treinos personalizados (Musculação, Natação, Corrida, Funcional) sincronizados com seus planos alimentares e objetivos.
-                  </p>
-                </div>
-                <div className="absolute -right-8 -bottom-12 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none" />
-              </div>
+          {/* View 5: Gestão de Treinos (Listagem idêntica a Pacientes) */}
+          {currentView === 'treinos_list' && (
+            <TreinoList
+              userId={user.id}
+              onNewTreino={() => {
+                setSelectedTreinoId(null);
+                setCurrentView('treinos_novo');
+              }}
+              onSelectTreino={(treinoId) => {
+                setSelectedTreinoId(treinoId);
+                setCurrentView('treinos_novo');
+              }}
+            />
+          )}
 
-              {/* Lista de Pacientes Vinculados para Treino */}
-              <div className="bg-white rounded-3xl border border-emerald-100 shadow-sm p-6 sm:p-8 space-y-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div>
-                    <h3 className="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
-                      <Users className="w-5 h-5 text-emerald-600" />
-                      <span>Pacientes Cadastrados</span>
-                    </h3>
-                    <p className="text-xs text-gray-500">
-                      Clique em um paciente para abrir sua aba de Sugestão de Treino e gerar com IA ou criar manualmente
-                    </p>
-                  </div>
-
-                  <div className="w-full sm:w-72">
-                    <input
-                      type="text"
-                      value={treinoSearch}
-                      onChange={(e) => setTreinoSearch(e.target.value)}
-                      placeholder="Buscar por nome do paciente..."
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white rounded-2xl text-xs text-gray-800 outline-none transition"
-                    />
-                  </div>
-                </div>
-
-                {loadingTreinoPacientes ? (
-                  <div className="py-16 text-center">
-                    <div className="w-10 h-10 border-4 border-emerald-600/30 border-t-emerald-600 rounded-full animate-spin mx-auto mb-3" />
-                    <p className="text-xs font-semibold text-gray-500">Carregando lista de pacientes...</p>
-                  </div>
-                ) : (
-                  (() => {
-                    const filtered = pacientesParaTreino.filter(p =>
-                      (p.nome || '').toLowerCase().includes(treinoSearch.toLowerCase())
-                    );
-
-                    if (filtered.length === 0) {
-                      return (
-                        <div className="py-12 text-center space-y-2">
-                          <Users className="w-10 h-10 text-gray-300 mx-auto" />
-                          <p className="text-sm font-bold text-gray-700">Nenhum paciente encontrado</p>
-                          <p className="text-xs text-gray-400">Cadastre um novo paciente para criar sugestões de treino.</p>
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {filtered.map((paciente) => {
-                          const objetivosList: string[] = Array.isArray(paciente.objetivos) ? paciente.objetivos : [];
-                          return (
-                            <div
-                              key={paciente.id}
-                              onClick={() => handlePatientClick(paciente.id, 'treino')}
-                              className="p-5 rounded-2xl border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50/30 transition cursor-pointer group shadow-xs space-y-4 flex flex-col justify-between"
-                            >
-                              <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
-                                      {paciente.nome ? paciente.nome.slice(0, 2).toUpperCase() : 'PA'}
-                                    </div>
-                                    <div>
-                                      <h4 className="text-sm font-bold text-gray-900 group-hover:text-emerald-700 transition">
-                                        {paciente.nome}
-                                      </h4>
-                                      <p className="text-[11px] text-gray-400">
-                                        {paciente.nivel_atividade || 'Nível de atividade não informado'}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition" />
-                                </div>
-
-                                {/* Badges de Objetivos */}
-                                {objetivosList.length > 0 && (
-                                  <div className="flex flex-wrap gap-1">
-                                    {objetivosList.slice(0, 2).map((obj, i) => (
-                                      <span
-                                        key={i}
-                                        className="px-2 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-full text-[10px] font-semibold"
-                                      >
-                                        {obj}
-                                      </span>
-                                    ))}
-                                    {objetivosList.length > 2 && (
-                                      <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded-full text-[10px] font-bold">
-                                        +{objetivosList.length - 2}
-                                      </span>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Rodapé do card: Planos e Treinos vinculados */}
-                              <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-                                <span className="inline-flex items-center gap-1 font-medium">
-                                  🥗 {paciente.total_planos || 0} dieta(s)
-                                </span>
-                                <span className="inline-flex items-center gap-1 font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100">
-                                  <Dumbbell className="w-3.5 h-3.5" />
-                                  <span>{paciente.total_treinos || 0} treino(s)</span>
-                                </span>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    );
-                  })()
-                )}
-              </div>
-            </div>
+          {/* View 6: Formulário de Ficha de Treino (Cadastro com 3 abas, IA e Plano Manual) */}
+          {currentView === 'treinos_novo' && (
+            <TreinoForm
+              userId={user.id}
+              initialTreinoId={selectedTreinoId}
+              onCancel={() => {
+                setSelectedTreinoId(null);
+                setCurrentView('treinos_list');
+              }}
+              onSaved={() => {
+                setSelectedTreinoId(null);
+                setCurrentView('treinos_list');
+              }}
+            />
           )}
 
           {/* View 4: Dashboard Principal (Prompt 3) */}
