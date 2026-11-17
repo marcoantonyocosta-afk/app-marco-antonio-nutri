@@ -13,17 +13,15 @@ import {
   CheckCircle2, 
   AlertCircle, 
   X, 
-  Scale,
-  Dumbbell
+  Scale
 } from 'lucide-react';
 import { PlanosAlimentares } from './PlanosAlimentares';
-import { SugestaoTreino, type PlanoTreinoRecord } from './SugestaoTreino';
 import { sql } from '../lib/neon';
 
 interface PatientProfileProps {
   patientId: string;
   onBack: () => void;
-  defaultSection?: 'dados' | 'consultas' | 'planos' | 'treino';
+  defaultSection?: 'dados' | 'consultas' | 'planos';
 }
 
 interface Consulta {
@@ -46,7 +44,7 @@ interface PlanoAlimentar {
 
 export const PatientProfile: React.FC<PatientProfileProps> = ({ patientId, onBack, defaultSection = 'dados' }) => {
   // Seções da Página
-  const [activeSection, setActiveSection] = useState<'dados' | 'consultas' | 'planos' | 'treino'>(defaultSection);
+  const [activeSection, setActiveSection] = useState<'dados' | 'consultas' | 'planos'>(defaultSection);
   
   // Abas da Seção 1 (Dados do Paciente)
   const [activeDataTab, setActiveDataTab] = useState<'pessoal' | 'clinico' | 'habitos'>('pessoal');
@@ -73,9 +71,6 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({ patientId, onBac
 
   // Planos Alimentares
   const [planos, setPlanos] = useState<PlanoAlimentar[]>([]);
-
-  // Planos de Treino
-  const [planosTreino, setPlanosTreino] = useState<PlanoTreinoRecord[]>([]);
 
   // Dados do Paciente (Editáveis)
   // Aba 1: Pessoal
@@ -167,20 +162,6 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({ patientId, onBac
         [patientId]
       );
       setPlanos(planosRes as PlanoAlimentar[]);
-
-      // 4. Planos de Treino
-      try {
-        const treinosRes = await sql.query(
-          `SELECT id, conteudo, created_at
-           FROM public.planos_treino
-           WHERE paciente_id = $1
-           ORDER BY created_at DESC`,
-          [patientId]
-        );
-        setPlanosTreino(treinosRes as PlanoTreinoRecord[]);
-      } catch (errTreino) {
-        console.warn('Tabela planos_treino ainda não consultável:', errTreino);
-      }
 
     } catch (err) {
       console.error('Erro ao carregar prontuário do paciente:', err);
@@ -666,22 +647,6 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({ patientId, onBac
             <span>Planos Alimentares</span>
             <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-extrabold rounded-full">
               {planos.length}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveSection('treino')}
-            className={`pb-3 text-sm font-bold flex items-center gap-2 border-b-2 transition cursor-pointer whitespace-nowrap ${
-              activeSection === 'treino'
-                ? 'border-emerald-600 text-emerald-700'
-                : 'border-transparent text-gray-400 hover:text-gray-600'
-            }`}
-          >
-            <Dumbbell className="w-4 h-4" />
-            <span>Sugestão de Treino</span>
-            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-extrabold rounded-full">
-              {planosTreino.length}
             </span>
           </button>
         </div>
@@ -1369,36 +1334,6 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({ patientId, onBac
             horarioAcorda: horarioAcordaInput,
             horarioDorme: horarioDormeInput,
             litrosAgua,
-            atividadeFisica: praticaAtividade ? atividadeDescricao : 'Não pratica atividade física',
-            observacoes,
-          }}
-        />
-      )}
-
-      {/* ======================================================== */}
-      {/* SEÇÃO 4: SUGESTÃO DE TREINO                              */}
-      {/* ======================================================== */}
-      {activeSection === 'treino' && (
-        <SugestaoTreino
-          patientId={patientId}
-          initialPlanos={planosTreino}
-          patientData={{
-            nome,
-            dataNascimento,
-            idade: dataNascimento ? (calcularIdade(dataNascimento) ?? undefined) : undefined,
-            sexo,
-            whatsapp,
-            email,
-            peso,
-            altura,
-            objetivos,
-            objetivoTexto,
-            nivelAtividade,
-            patologias,
-            restricoes,
-            alergias,
-            medicamentos,
-            suplementos,
             atividadeFisica: praticaAtividade ? atividadeDescricao : 'Não pratica atividade física',
             observacoes,
           }}

@@ -7,16 +7,13 @@ import {
   LayoutDashboard, 
   ChevronRight, 
   Activity,
-  Sparkles,
-  Dumbbell
+  Sparkles
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { sql } from '../lib/neon';
 import { PatientList } from './PatientList';
 import { PatientForm } from './PatientForm';
 import { PatientProfile } from './PatientProfile';
-import { TreinoList } from './TreinoList';
-import { TreinoForm } from './TreinoForm';
 import { PWAInstallPrompt } from './PWAInstallPrompt';
 
 interface DashboardProps {
@@ -36,11 +33,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const [pacientesSemRetorno, setPacientesSemRetorno] = useState<InactivePatient[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Navegação: 'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'treinos_list' | 'treinos_novo'
-  const [currentView, setCurrentView] = useState<'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'treinos_list' | 'treinos_novo'>('dashboard');
+  // Navegação: 'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil'
+  const [currentView, setCurrentView] = useState<'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil'>('dashboard');
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
-  const [selectedTreinoId, setSelectedTreinoId] = useState<string | null>(null);
-  const [defaultProfileSection, setDefaultProfileSection] = useState<'dados' | 'consultas' | 'planos' | 'treino'>('dados');
+  const [defaultProfileSection, setDefaultProfileSection] = useState<'dados' | 'consultas' | 'planos'>('dados');
 
   const loadDashboardData = async () => {
     try {
@@ -96,7 +92,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     }
   }, [user?.id]);
 
-  const handlePatientClick = (patientId: string, section: 'dados' | 'consultas' | 'planos' | 'treino' = 'dados') => {
+  const handlePatientClick = (patientId: string, section: 'dados' | 'consultas' | 'planos' = 'dados') => {
     setSelectedPatientId(patientId);
     setDefaultProfileSection(section);
     setCurrentView('pacientes_perfil');
@@ -112,10 +108,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         return 'Novo Paciente';
       case 'pacientes_perfil':
         return 'Perfil do Paciente';
-      case 'treinos_list':
-        return 'Gestão de Treinos';
-      case 'treinos_novo':
-        return selectedTreinoId ? 'Editar Ficha de Treino' : 'Novo Treino';
     }
   };
 
@@ -154,21 +146,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             >
               <Users className="w-5 h-5" />
               <span>Pacientes</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setSelectedTreinoId(null);
-                setCurrentView('treinos_list');
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                currentView === 'treinos_list' || currentView === 'treinos_novo'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
-                  : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
-              }`}
-            >
-              <Dumbbell className="w-5 h-5" />
-              <span>Treinos</span>
             </button>
           </nav>
         </div>
@@ -252,37 +229,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                 setSelectedPatientId(id);
                 setDefaultProfileSection('dados');
                 setCurrentView('pacientes_perfil');
-              }}
-            />
-          )}
-
-          {/* View 5: Gestão de Treinos (Listagem idêntica a Pacientes) */}
-          {currentView === 'treinos_list' && (
-            <TreinoList
-              userId={user.id}
-              onNewTreino={() => {
-                setSelectedTreinoId(null);
-                setCurrentView('treinos_novo');
-              }}
-              onSelectTreino={(treinoId) => {
-                setSelectedTreinoId(treinoId);
-                setCurrentView('treinos_novo');
-              }}
-            />
-          )}
-
-          {/* View 6: Formulário de Ficha de Treino (Cadastro com 3 abas, IA e Plano Manual) */}
-          {currentView === 'treinos_novo' && (
-            <TreinoForm
-              userId={user.id}
-              initialTreinoId={selectedTreinoId}
-              onCancel={() => {
-                setSelectedTreinoId(null);
-                setCurrentView('treinos_list');
-              }}
-              onSaved={() => {
-                setSelectedTreinoId(null);
-                setCurrentView('treinos_list');
               }}
             />
           )}
