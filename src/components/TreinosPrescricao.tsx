@@ -401,7 +401,7 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
         </div>
       )}
 
-      {/* ── HEADER TOPO (mini) ───────────────────────────────────── */}
+      {/* ── HEADER TOPO ─────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
           <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">
@@ -419,76 +419,47 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
         </button>
       </div>
 
-      {/* ── HERO BANNER VERDE ESCURO ──────────────────────────────── */}
+      {/* ── BARRA VERDE ACCENT ───────────────────────────────────── */}
       <div
-        className="relative rounded-3xl overflow-hidden px-8 py-8"
-        style={{
-          background: 'linear-gradient(135deg, #064e3b 0%, #065f46 40%, #047857 70%, #059669 100%)',
-        }}
-      >
-        {/* Círculos decorativos de fundo */}
-        <div className="absolute top-0 right-0 w-56 h-56 rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #34d399, transparent)', transform: 'translate(30%, -30%)' }} />
-        <div className="absolute bottom-0 left-1/3 w-40 h-40 rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #6ee7b7, transparent)', transform: 'translateY(40%)' }} />
+        className="w-full h-2.5 rounded-full"
+        style={{ background: 'linear-gradient(90deg, #064e3b 0%, #059669 60%, #34d399 100%)' }}
+      />
 
-        <div className="relative z-10 max-w-2xl space-y-3">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-[11px] font-bold px-3 py-1 rounded-full">
-            <span>🏋️</span>
-            <span>Nutrição Esportiva &amp; Performance</span>
-          </div>
-
-          {/* Título */}
-          <h1 className="text-2xl sm:text-3xl font-black text-white leading-tight">
-            Prescrição &amp; Acompanhamento de Treinos{' '}
-            <span className="text-2xl">🏆</span>
-          </h1>
-
-          {/* Subtítulo */}
-          <p className="text-sm text-emerald-100/90 leading-relaxed max-w-lg">
-            Tenha total liberdade para criar e editar seus treinos: adicione exercícios, altere séries, reps, distâncias,
-            cargas e tempos de descanso em tempo real.
-          </p>
-
-          {/* Botão CTA */}
-          <button
-            type="button"
-            onClick={handleOpenNovoTreino}
-            className="inline-flex items-center gap-2 mt-1 px-5 py-2.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/40 text-white font-bold text-xs rounded-xl transition cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Criar Nova Ficha de Treino
-          </button>
+      {/* ── FILTROS POR MODALIDADE (tabs horizontais) ────────────── */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+        <div className="flex divide-x divide-gray-100 overflow-x-auto">
+          {MODALITY_FILTERS.map(({ key, label, icon: Icon }) => {
+            const count = countByModality(key);
+            const isActive = activeFilter === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setActiveFilter(key)}
+                className={`flex flex-col items-center justify-center gap-1 px-4 py-3 min-w-[90px] transition cursor-pointer shrink-0 relative ${
+                  isActive
+                    ? 'bg-emerald-50 text-emerald-700'
+                    : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+                }`}
+              >
+                {/* Linha indicadora no topo quando ativo */}
+                {isActive && (
+                  <span className="absolute top-0 left-0 right-0 h-0.5 bg-emerald-600 rounded-b" />
+                )}
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isActive ? 'bg-emerald-100' : 'bg-gray-100'}`}>
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-600' : 'text-gray-400'}`} />
+                </div>
+                <span className="text-[10px] font-black leading-tight text-center">{label}</span>
+                <span className={`text-[11px] font-bold ${isActive ? 'text-emerald-600' : 'text-gray-400'}`}>
+                  {count}
+                </span>
+                <span className={`text-[9px] font-medium ${isActive ? 'text-emerald-500' : 'text-gray-400'}`}>
+                  {count === 1 ? 'prescrição' : 'prescrições'}
+                </span>
+              </button>
+            );
+          })}
         </div>
-      </div>
-
-      {/* ── FILTROS POR MODALIDADE ────────────────────────────────── */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-        {MODALITY_FILTERS.map(({ key, label, icon: Icon }) => {
-          const count = countByModality(key);
-          const isActive = activeFilter === key;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setActiveFilter(key)}
-              className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl border transition cursor-pointer text-center ${
-                isActive
-                  ? 'bg-emerald-600 border-emerald-700 text-white shadow-md'
-                  : 'bg-white border-gray-200 text-gray-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700'
-              }`}
-            >
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
-                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-500'}`} />
-              </div>
-              <span className="text-[10px] font-black leading-tight">{label}</span>
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>
-                {count}
-              </span>
-            </button>
-          );
-        })}
       </div>
 
       {/* ── BARRA DE BUSCA + BOTÃO ────────────────────────────────── */}
@@ -500,15 +471,15 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
             placeholder="Buscar por paciente, objetivo ou título do treino..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-2xl text-sm font-medium focus:border-emerald-500 outline-none shadow-xs"
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-2xl text-sm font-medium focus:border-emerald-500 outline-none shadow-xs"
           />
         </div>
         <button
           type="button"
           onClick={handleOpenNovoTreino}
-          className="inline-flex items-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-2xl shadow-sm transition cursor-pointer shrink-0"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-2xl shadow-sm transition cursor-pointer shrink-0"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           <span>Adicionar + treino</span>
         </button>
       </div>
