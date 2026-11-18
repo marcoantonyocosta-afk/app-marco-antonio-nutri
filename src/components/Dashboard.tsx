@@ -15,8 +15,7 @@ import { sql } from '../lib/neon';
 import { PatientList } from './PatientList';
 import { PatientForm } from './PatientForm';
 import { PatientProfile } from './PatientProfile';
-import { TreinoList } from './TreinoList';
-import { TreinoForm } from './TreinoForm';
+import { TreinosPrescricao } from './TreinosPrescricao';
 import { PWAInstallPrompt } from './PWAInstallPrompt';
 
 interface DashboardProps {
@@ -36,10 +35,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const [pacientesSemRetorno, setPacientesSemRetorno] = useState<InactivePatient[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Navegação: 'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'treinos_list' | 'treinos_novo'
-  const [currentView, setCurrentView] = useState<'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'treinos_list' | 'treinos_novo'>('dashboard');
+  // Navegação: 'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'treinos_list'
+  const [currentView, setCurrentView] = useState<'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'treinos_list'>('dashboard');
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
-  const [selectedTreinoId, setSelectedTreinoId] = useState<string | null>(null);
   const [defaultProfileSection, setDefaultProfileSection] = useState<'dados' | 'consultas' | 'planos'>('dados');
 
   const loadDashboardData = async () => {
@@ -113,9 +111,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       case 'pacientes_perfil':
         return 'Perfil do Paciente';
       case 'treinos_list':
-        return 'Treinos (Musculação/Natação/etc.)';
-      case 'treinos_novo':
-        return selectedTreinoId ? 'Editar Ficha de Treino' : 'Novo Treino';
+        return 'Prescrição de Treinos';
     }
   };
 
@@ -157,12 +153,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             </button>
 
             <button
-              onClick={() => {
-                setSelectedTreinoId(null);
-                setCurrentView('treinos_list');
-              }}
+              onClick={() => setCurrentView('treinos_list')}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                currentView === 'treinos_list' || currentView === 'treinos_novo'
+                currentView === 'treinos_list'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
                   : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
               }`}
@@ -256,33 +249,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             />
           )}
 
-          {/* View 5: Gestão de Treinos (Listagem idêntica a Pacientes) */}
+          {/* View 5: Prescrição de Treinos (Treinos & Exercícios exatamente como na foto) */}
           {currentView === 'treinos_list' && (
-            <TreinoList
+            <TreinosPrescricao
               userId={user.id}
-              onNewTreino={() => {
-                setSelectedTreinoId(null);
-                setCurrentView('treinos_novo');
-              }}
-              onSelectTreino={(treinoId) => {
-                setSelectedTreinoId(treinoId);
-                setCurrentView('treinos_novo');
-              }}
-            />
-          )}
-
-          {/* View 6: Formulário de Ficha de Treino (Cadastro com 3 abas, IA e Plano Manual) */}
-          {currentView === 'treinos_novo' && (
-            <TreinoForm
-              userId={user.id}
-              initialTreinoId={selectedTreinoId}
-              onCancel={() => {
-                setSelectedTreinoId(null);
-                setCurrentView('treinos_list');
-              }}
-              onSaved={() => {
-                setSelectedTreinoId(null);
-                setCurrentView('treinos_list');
+              onSelectPatient={(patientId) => {
+                setSelectedPatientId(patientId);
+                setDefaultProfileSection('planos');
+                setCurrentView('pacientes_perfil');
               }}
             />
           )}
