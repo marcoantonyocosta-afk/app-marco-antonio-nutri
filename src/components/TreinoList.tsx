@@ -20,10 +20,10 @@ interface TreinoListProps {
 
 interface TreinoSummary {
   id: string;
-  nome_aluno: string;
-  objetivo: string | null;
+  nome_paciente: string;
+  objetivos: any;
   modalidade: string | null;
-  nivel_atividade: string | null;
+  nivel_experiencia: string | null;
   created_at: string;
   dias_treino: any;
 }
@@ -42,7 +42,7 @@ export const TreinoList: React.FC<TreinoListProps> = ({
     try {
       setLoading(true);
       const res = await sql.query(
-        `SELECT id, nome_aluno, objetivo, modalidade, nivel_atividade, created_at, dias_treino
+        `SELECT id, nome_paciente, objetivos, modalidade, nivel_experiencia, created_at, dias_treino
          FROM public.fichas_treino
          WHERE nutricionista_id = $1
          ORDER BY created_at DESC`,
@@ -75,11 +75,14 @@ export const TreinoList: React.FC<TreinoListProps> = ({
     }
   };
 
-  const filteredTreinos = treinos.filter(t => 
-    (t.nome_aluno || '').toLowerCase().includes(search.toLowerCase()) ||
-    (t.objetivo || '').toLowerCase().includes(search.toLowerCase()) ||
-    (t.modalidade || '').toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredTreinos = treinos.filter(t => {
+    const objetivosStr = Array.isArray(t.objetivos) ? t.objetivos.join(' ') : (t.objetivos || '');
+    return (
+      (t.nome_paciente || '').toLowerCase().includes(search.toLowerCase()) ||
+      objetivosStr.toLowerCase().includes(search.toLowerCase()) ||
+      (t.modalidade || '').toLowerCase().includes(search.toLowerCase())
+    );
+  });
 
   return (
     <div className="space-y-6">
@@ -160,7 +163,7 @@ export const TreinoList: React.FC<TreinoListProps> = ({
                       </div>
                       <div>
                         <h4 className="font-extrabold text-gray-900 group-hover:text-emerald-700 transition">
-                          {treino.nome_aluno}
+                          {treino.nome_paciente}
                         </h4>
                         <span className="text-xs text-gray-400 block mt-0.5">
                           {treino.modalidade || 'Musculação'}
@@ -181,16 +184,18 @@ export const TreinoList: React.FC<TreinoListProps> = ({
 
                   {/* Informações e Badges */}
                   <div className="space-y-2 pt-2 border-t border-gray-100">
-                    {treino.objetivo && (
+                    {treino.objetivos && (
                       <div className="flex items-center gap-2 text-xs text-gray-600">
                         <Target className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        <span className="font-semibold">{treino.objetivo}</span>
+                        <span className="font-semibold">
+                          {Array.isArray(treino.objetivos) ? treino.objetivos.slice(0, 2).join(', ') : treino.objetivos}
+                        </span>
                       </div>
                     )}
-                    {treino.nivel_atividade && (
+                    {treino.nivel_experiencia && (
                       <div className="flex items-center gap-2 text-xs text-gray-600">
                         <Activity className="w-3.5 h-3.5 text-teal-600 shrink-0" />
-                        <span>{treino.nivel_atividade}</span>
+                        <span>{treino.nivel_experiencia}</span>
                       </div>
                     )}
                     <div className="flex items-center gap-2 text-xs text-gray-400">
