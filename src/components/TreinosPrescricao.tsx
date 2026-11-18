@@ -9,18 +9,11 @@ import {
   Trash2,
   Table,
   CheckCircle2,
-  Dumbbell,
   Loader2,
   X,
   Save,
   Plus,
   PlusCircle,
-  Waves,
-  Bike,
-  Zap,
-  Activity,
-  Flame,
-  PersonStanding,
 } from 'lucide-react';
 import { sql } from '../lib/neon';
 
@@ -63,19 +56,6 @@ interface TreinosPrescricaoProps {
 const MODALIDADES = ['Musculação', 'Natação', 'Corrida', 'Ciclismo', 'Funcional', 'CrossFit', 'Pilates', 'Outro'];
 const NIVEIS = ['INICIANTE', 'INTERMEDIÁRIO', 'AVANÇADO'];
 
-// Configuração dos filtros de modalidade com ícones
-const MODALITY_FILTERS = [
-  { key: 'all', label: 'Todos', icon: Activity },
-  { key: 'Musculação', label: 'Musculação', icon: Dumbbell },
-  { key: 'Natação', label: 'Natação', icon: Waves },
-  { key: 'Corrida', label: 'Corrida / Caminhada', icon: Flame },
-  { key: 'Ciclismo', label: 'Ciclismo', icon: Bike },
-  { key: 'Funcional', label: 'Treino Funcional / Cross', icon: Zap },
-  { key: 'other', label: 'Outras Atividades', icon: PersonStanding },
-];
-
-const KNOWN_MODALITIES = ['Musculação', 'Natação', 'Corrida', 'Ciclismo', 'Funcional', 'CrossFit'];
-
 function emptyExercicio(): Exercicio {
   return { nome: '', series: '3', reps: '12', distancia: '-', carga: '-', intensidade: 'RPE 7', descanso: '60s' };
 }
@@ -84,7 +64,6 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
   const [planos, setPlanos] = useState<PlanoTreinoDB[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [activeFilter, setActiveFilter] = useState<string>('all');
   const [isSaving, setIsSaving] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -180,29 +159,14 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
     }
   });
 
-  // Contagem por modalidade para os filtros
-  const countByModality = (key: string) => {
-    if (key === 'all') return allCards.length;
-    if (key === 'other') return allCards.filter((c) => !KNOWN_MODALITIES.some((m) => c.card.tipo_treino.includes(m))).length;
-    return allCards.filter((c) => c.card.tipo_treino.includes(key)).length;
-  };
-
-  // Filtro ativo + busca
-  const filteredCards = allCards.filter((item) => {
-    const matchSearch =
+  // Filtro por busca de texto
+  const filteredCards = allCards.filter(
+    (item) =>
       item.pacienteNome.toLowerCase().includes(search.toLowerCase()) ||
       item.card.dia.toLowerCase().includes(search.toLowerCase()) ||
       (item.card.titulo || '').toLowerCase().includes(search.toLowerCase()) ||
-      item.card.tipo_treino.toLowerCase().includes(search.toLowerCase());
-
-    const matchFilter =
-      activeFilter === 'all' ||
-      (activeFilter === 'other'
-        ? !KNOWN_MODALITIES.some((m) => item.card.tipo_treino.includes(m))
-        : item.card.tipo_treino.includes(activeFilter));
-
-    return matchSearch && matchFilter;
-  });
+      item.card.tipo_treino.toLowerCase().includes(search.toLowerCase())
+  );
 
   // ── Salvar edição do card (Modal 2) ──────────────────────────────────────────
   const handleSaveCardEdit = async () => {
@@ -301,7 +265,7 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
       pacienteId: '',
       dia: 'Treino A',
       titulo: '',
-      tipo_treino: activeFilter !== 'all' && activeFilter !== 'other' ? activeFilter : 'Musculação',
+      tipo_treino: 'Musculação',
       nivel: 'INTERMEDIÁRIO',
       frequencia: '3x por semana',
       duracao_minutos: 60,
@@ -315,12 +279,7 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
       );
       setNovoTreino((prev) =>
         prev
-          ? {
-              ...prev,
-              pacientes: res as { id: string; nome: string }[],
-              loadingPacientes: false,
-              pacienteId: (res as any[])[0]?.id || '',
-            }
+          ? { ...prev, pacientes: res as { id: string; nome: string }[], loadingPacientes: false, pacienteId: (res as any[])[0]?.id || '' }
           : null
       );
     } catch {
@@ -373,6 +332,7 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
     }
   };
 
+  // ── Helpers de estilo ─────────────────────────────────────────────────────────
   const nivelColor = (nivel?: string) => {
     if (!nivel) return 'text-gray-400 bg-gray-100';
     if (nivel.includes('INICI')) return 'text-emerald-700 bg-emerald-50';
@@ -391,17 +351,19 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
 
   const inputCell = 'w-full px-1.5 py-1 bg-white border border-gray-200 rounded text-xs font-medium focus:border-emerald-500 outline-none min-w-[60px]';
 
+  // ─────────────────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-5 max-w-7xl mx-auto pb-16">
+
       {/* Toast */}
       {toastMessage && (
-        <div className="fixed top-6 right-6 z-50 bg-emerald-700 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-sm font-bold animate-in fade-in">
+        <div className="fixed top-6 right-6 z-50 bg-emerald-700 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-sm font-bold">
           <CheckCircle2 className="w-4 h-4 text-emerald-300" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* ── HEADER TOPO ─────────────────────────────────────────── */}
+      {/* ══ HEADER ══════════════════════════════════════════════════ */}
       <div className="flex items-center justify-between">
         <div>
           <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">
@@ -419,50 +381,7 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
         </button>
       </div>
 
-      {/* ── BARRA VERDE ACCENT ───────────────────────────────────── */}
-      <div
-        className="w-full h-2.5 rounded-full"
-        style={{ background: 'linear-gradient(90deg, #064e3b 0%, #059669 60%, #34d399 100%)' }}
-      />
-
-      {/* ── FILTROS POR MODALIDADE (tabs horizontais) ────────────── */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
-        <div className="flex divide-x divide-gray-100 overflow-x-auto">
-          {MODALITY_FILTERS.map(({ key, label, icon: Icon }) => {
-            const count = countByModality(key);
-            const isActive = activeFilter === key;
-            return (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setActiveFilter(key)}
-                className={`flex flex-col items-center justify-center gap-1 px-4 py-3 min-w-[90px] transition cursor-pointer shrink-0 relative ${
-                  isActive
-                    ? 'bg-emerald-50 text-emerald-700'
-                    : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700'
-                }`}
-              >
-                {/* Linha indicadora no topo quando ativo */}
-                {isActive && (
-                  <span className="absolute top-0 left-0 right-0 h-0.5 bg-emerald-600 rounded-b" />
-                )}
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isActive ? 'bg-emerald-100' : 'bg-gray-100'}`}>
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-600' : 'text-gray-400'}`} />
-                </div>
-                <span className="text-[10px] font-black leading-tight text-center">{label}</span>
-                <span className={`text-[11px] font-bold ${isActive ? 'text-emerald-600' : 'text-gray-400'}`}>
-                  {count}
-                </span>
-                <span className={`text-[9px] font-medium ${isActive ? 'text-emerald-500' : 'text-gray-400'}`}>
-                  {count === 1 ? 'prescrição' : 'prescrições'}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ── BARRA DE BUSCA + BOTÃO ────────────────────────────────── */}
+      {/* ══ BARRA DE BUSCA + CONTADOR + BOTÃO ══════════════════════ */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1">
           <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -474,6 +393,11 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-2xl text-sm font-medium focus:border-emerald-500 outline-none shadow-xs"
           />
         </div>
+        {!loading && (
+          <span className="text-xs font-semibold text-gray-500 shrink-0 whitespace-nowrap">
+            Exibindo {filteredCards.length} treino(s)
+          </span>
+        )}
         <button
           type="button"
           onClick={handleOpenNovoTreino}
@@ -484,7 +408,7 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
         </button>
       </div>
 
-      {/* ── GRID DE CARDS ─────────────────────────────────────────── */}
+      {/* ══ GRID DE CARDS ═══════════════════════════════════════════ */}
       {loading ? (
         <div className="py-20 text-center flex flex-col items-center gap-3 text-gray-400">
           <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
@@ -492,14 +416,10 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
         </div>
       ) : filteredCards.length === 0 ? (
         <div className="bg-white rounded-3xl p-14 text-center border border-emerald-100 space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-3xl">
-            🏋️
-          </div>
+          <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto text-3xl">🏋️</div>
           <h3 className="text-base font-bold text-gray-900">Nenhum treino encontrado</h3>
           <p className="text-xs text-gray-500 max-w-sm mx-auto">
-            {search || activeFilter !== 'all'
-              ? 'Tente ajustar os filtros ou a busca.'
-              : 'Clique em "+ Adicionar + treino" para criar o primeiro plano.'}
+            {search ? 'Tente ajustar a busca.' : 'Clique em "+ Adicionar + treino" para criar o primeiro plano.'}
           </p>
           <button
             type="button"
@@ -568,7 +488,7 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
                       </span>
                     </div>
                     <ul className="space-y-1 text-xs">
-                      {card.exercicios.slice(0, 3).map((ex, exIdx) => (
+                      {card.exercicios.slice(0, 4).map((ex, exIdx) => (
                         <li key={exIdx} className="flex items-baseline gap-1 text-gray-800 leading-snug">
                           <span className="text-emerald-500 font-bold shrink-0">•</span>
                           <span className="font-bold text-gray-900 truncate max-w-[150px]">{ex.nome}</span>
@@ -583,8 +503,8 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
                           )}
                         </li>
                       ))}
-                      {card.exercicios.length > 3 && (
-                        <li className="text-[10px] text-gray-400 italic">+ {card.exercicios.length - 3} exercício(s)</li>
+                      {card.exercicios.length > 4 && (
+                        <li className="text-[10px] text-gray-400 italic">+ {card.exercicios.length - 4} exercício(s)</li>
                       )}
                       {card.exercicios.length === 0 && (
                         <li className="text-[10px] text-gray-400 italic">Nenhum exercício adicionado</li>
@@ -598,13 +518,7 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
                   <button
                     type="button"
                     onClick={() =>
-                      setTableModal({
-                        planId,
-                        cardIndex,
-                        card: JSON.parse(JSON.stringify(card)),
-                        pacienteNome,
-                        dirty: false,
-                      })
+                      setTableModal({ planId, cardIndex, card: JSON.parse(JSON.stringify(card)), pacienteNome, dirty: false })
                     }
                     className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 bg-gray-50 hover:bg-emerald-50 text-gray-700 hover:text-emerald-700 border border-gray-200 hover:border-emerald-300 rounded-xl text-xs font-bold transition cursor-pointer"
                   >
@@ -634,9 +548,9 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════
+      {/* ══════════════════════════════════════════════════════════════
           MODAL 1 — VER & EDITAR TABELA
-      ══════════════════════════════════════════════════════════ */}
+      ══════════════════════════════════════════════════════════════ */}
       {tableModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-3">
           <div className="bg-white rounded-3xl max-w-5xl w-full shadow-2xl border border-emerald-100 flex flex-col max-h-[92vh]">
@@ -700,9 +614,7 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
               {tableModal.dirty && <span className="text-xs text-amber-600 font-semibold">● Alterações não salvas</span>}
               <div className="flex items-center gap-3 ml-auto">
                 <button type="button" onClick={() => setTableModal(null)}
-                  className="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-xl cursor-pointer">
-                  Fechar
-                </button>
+                  className="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-xl cursor-pointer">Fechar</button>
                 <button type="button" disabled={isSaving || !tableModal.dirty} onClick={handleSaveTable}
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow cursor-pointer">
                   {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
@@ -714,9 +626,9 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════
+      {/* ══════════════════════════════════════════════════════════════
           MODAL 2 — EDITAR METADADOS DO CARD
-      ══════════════════════════════════════════════════════════ */}
+      ══════════════════════════════════════════════════════════════ */}
       {editingCard && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-3">
           <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-emerald-100 flex flex-col max-h-[92vh]">
@@ -826,9 +738,9 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════
+      {/* ══════════════════════════════════════════════════════════════
           MODAL 3 — NOVO TREINO
-      ══════════════════════════════════════════════════════════ */}
+      ══════════════════════════════════════════════════════════════ */}
       {novoTreino && novoTreino.open && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-3">
           <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-emerald-100 flex flex-col max-h-[92vh]">
@@ -844,7 +756,6 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
             </div>
 
             <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
-              {/* Paciente */}
               <div>
                 <label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Paciente *</label>
                 {novoTreino.loadingPacientes ? (
@@ -960,6 +871,7 @@ export const TreinosPrescricao: React.FC<TreinosPrescricaoProps> = ({ userId }) 
           </div>
         </div>
       )}
+
     </div>
   );
 };
