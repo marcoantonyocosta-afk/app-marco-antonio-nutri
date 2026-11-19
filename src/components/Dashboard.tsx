@@ -7,13 +7,15 @@ import {
   LayoutDashboard, 
   ChevronRight, 
   Activity,
-  Sparkles
+  Sparkles,
+  Dumbbell
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { sql } from '../lib/neon';
 import { PatientList } from './PatientList';
 import { PatientForm } from './PatientForm';
 import { PatientProfile } from './PatientProfile';
+import { TreinosPrescricao } from './TreinosPrescricao';
 import { PWAInstallPrompt } from './PWAInstallPrompt';
 
 interface DashboardProps {
@@ -33,8 +35,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const [pacientesSemRetorno, setPacientesSemRetorno] = useState<InactivePatient[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Navegação: 'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil'
-  const [currentView, setCurrentView] = useState<'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil'>('dashboard');
+  // Navegação: 'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'treinos_list'
+  const [currentView, setCurrentView] = useState<'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'treinos_list'>('dashboard');
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [defaultProfileSection, setDefaultProfileSection] = useState<'dados' | 'consultas' | 'planos'>('dados');
 
@@ -101,6 +103,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       case 'pacientes_list': return 'Gestão de Pacientes';
       case 'pacientes_novo': return 'Novo Paciente';
       case 'pacientes_perfil': return 'Perfil do Paciente';
+      case 'treinos_list':   return 'Prescrição de Treinos';
     }
   };
 
@@ -139,6 +142,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             >
               <Users className="w-5 h-5" />
               <span>Pacientes</span>
+            </button>
+
+            <button
+              onClick={() => setCurrentView('treinos_list')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                currentView === 'treinos_list'
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                  : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
+              }`}
+            >
+              <Dumbbell className="w-5 h-5" />
+              <span>Treinos</span>
             </button>
           </nav>
         </div>
@@ -224,6 +239,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                 setCurrentView('pacientes_perfil');
               }}
             />
+          )}
+
+          {/* View: Prescrição e Acompanhamento de Treinos */}
+          {currentView === 'treinos_list' && (
+            <TreinosPrescricao userId={user.id} />
           )}
 
           {/* View: Dashboard Principal */}
