@@ -55,9 +55,9 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onSuccess }) =
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f9f6] flex flex-col justify-between p-4 sm:p-8 lg:p-12 font-sans relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#f3f9f6] flex flex-col justify-between p-4 sm:p-6 lg:p-12 font-sans relative overflow-x-hidden">
       {/* Top Header */}
-      <header className="w-full max-w-7xl mx-auto flex items-center justify-between pb-4">
+      <header className="w-full max-w-7xl mx-auto flex items-center justify-between pb-3 sm:pb-6">
         <Logo size="md" subtitle="GESTÃO NUTRICIONAL INTEGRADA" align="left" />
         <div className="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/80 border border-emerald-100/90 rounded-full text-xs font-semibold text-emerald-800 shadow-xs backdrop-blur-xs">
           <ShieldCheck className="w-4 h-4 text-emerald-600" />
@@ -65,70 +65,16 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onSuccess }) =
         </div>
       </header>
 
-      {/* Main Content: Split 2 Colunas */}
-      <main className="w-full max-w-7xl mx-auto my-auto py-8 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+      {/* Main Content: Split 2 Colunas com o formulário em prioridade visual em telas menores */}
+      <main className="w-full max-w-7xl mx-auto my-auto py-4 sm:py-8 flex flex-col lg:grid lg:grid-cols-12 gap-8 lg:gap-16 items-center">
         
-        {/* Coluna Esquerda: Apresentação */}
-        <div className="lg:col-span-7 space-y-7">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-emerald-100/60 border border-emerald-200/60 rounded-full text-xs font-bold text-emerald-800">
-            <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-            <span>Gestão Nutricional de Alta Performance</span>
-          </div>
-
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 tracking-tight leading-[1.15]">
-            Potencialize o atendimento dos seus pacientes.
-          </h1>
-
-          <p className="text-gray-600 text-sm sm:text-base leading-relaxed max-w-xl">
-            O <strong>NutriFit</strong> foi desenvolvido sob medida para nutricionistas que buscam excelência clínica, planos alimentares inteligentes e total segurança de dados.
-          </p>
-
-          {/* Lista de Recursos com Ícones */}
-          <div className="space-y-4 pt-2">
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-gray-900">Histórico Clínico e Anamnese</h4>
-                <p className="text-xs text-gray-500">Acompanhe a evolução e histórico completo dos seus pacientes.</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-gray-900">Prescrição e Planos Alimentares</h4>
-                <p className="text-xs text-gray-500">Cálculo de dietas e distribuição de macronutrientes.</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-gray-900">Segurança e Privacidade</h4>
-                <p className="text-xs text-gray-500">Proteção de dados com criptografia e Row Level Security (RLS).</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-2 flex items-center gap-2 text-xs text-gray-500 font-medium">
-            <Heart className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Dedicado a profissionais da saúde e nutrição.</span>
-          </div>
-        </div>
-
-        {/* Coluna Direita: Card de Login */}
-        <div className="lg:col-span-5 w-full max-w-md mx-auto lg:max-w-none">
-          <div className="bg-white rounded-3xl shadow-xl shadow-emerald-950/5 border border-emerald-100 p-8 sm:p-10">
+        {/* Formulário de Login (Card) -> order-1 no mobile para prioridade imediata de interação */}
+        <div className="order-1 lg:order-2 lg:col-span-5 w-full max-w-md mx-auto">
+          <div className="bg-white rounded-3xl shadow-xl shadow-emerald-950/5 border border-emerald-100 p-6 sm:p-10">
             {/* Logo interna do Card */}
             <div className="flex flex-col items-center mb-6">
               <Logo size="md" subtitle="GESTÃO NUTRICIONAL INTEGRADA" align="center" />
-              <h2 className="text-2xl font-black text-gray-900 tracking-tight mt-5">
+              <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight mt-4 sm:mt-5 text-center">
                 Bem-vindo de volta
               </h2>
               <p className="text-xs text-gray-500 text-center mt-1">
@@ -224,6 +170,61 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onSuccess }) =
             </div>
           </div>
         </div>
+
+        {/* Apresentação Institucional -> order-2 no mobile (aparece logo abaixo caso o usuário queira ler) e lg:order-1 no desktop */}
+        <div className="order-2 lg:order-1 lg:col-span-7 space-y-6 sm:space-y-7 text-center lg:text-left">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-emerald-100/60 border border-emerald-200/60 rounded-full text-xs font-bold text-emerald-800 mx-auto lg:mx-0">
+            <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+            <span>Gestão Nutricional de Alta Performance</span>
+          </div>
+
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-gray-900 tracking-tight leading-[1.15]">
+            Potencialize o atendimento dos seus pacientes.
+          </h1>
+
+          <p className="text-gray-600 text-xs sm:text-base leading-relaxed max-w-xl mx-auto lg:mx-0">
+            O <strong>NutriFit</strong> foi desenvolvido sob medida para nutricionistas que buscam excelência clínica, planos alimentares inteligentes e total segurança de dados.
+          </p>
+
+          {/* Lista de Recursos com Ícones */}
+          <div className="space-y-3.5 pt-1 text-left max-w-lg mx-auto lg:mx-0">
+            <div className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <h4 className="text-xs sm:text-sm font-bold text-gray-900">Histórico Clínico e Anamnese</h4>
+                <p className="text-[11px] sm:text-xs text-gray-500">Acompanhe a evolução e histórico completo dos seus pacientes.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <h4 className="text-xs sm:text-sm font-bold text-gray-900">Prescrição e Planos Alimentares</h4>
+                <p className="text-[11px] sm:text-xs text-gray-500">Cálculo de dietas e distribuição de macronutrientes.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <h4 className="text-xs sm:text-sm font-bold text-gray-900">Segurança e Privacidade</h4>
+                <p className="text-[11px] sm:text-xs text-gray-500">Proteção de dados com criptografia e Row Level Security (RLS).</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2 flex items-center justify-center lg:justify-start gap-2 text-xs text-gray-500 font-medium">
+            <Heart className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Dedicado a profissionais da saúde e nutrição.</span>
+          </div>
+        </div>
+
       </main>
 
       {/* Footer */}
