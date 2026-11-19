@@ -7,15 +7,13 @@ import {
   LayoutDashboard, 
   ChevronRight, 
   Activity,
-  Sparkles,
-  Dumbbell
+  Sparkles
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { sql } from '../lib/neon';
 import { PatientList } from './PatientList';
 import { PatientForm } from './PatientForm';
 import { PatientProfile } from './PatientProfile';
-import { TreinosPrescricao } from './TreinosPrescricao';
 import { PWAInstallPrompt } from './PWAInstallPrompt';
 
 interface DashboardProps {
@@ -35,8 +33,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const [pacientesSemRetorno, setPacientesSemRetorno] = useState<InactivePatient[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Navegação: 'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'treinos_list'
-  const [currentView, setCurrentView] = useState<'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'treinos_list'>('dashboard');
+  // Navegação: 'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil'
+  const [currentView, setCurrentView] = useState<'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil'>('dashboard');
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [defaultProfileSection, setDefaultProfileSection] = useState<'dados' | 'consultas' | 'planos'>('dados');
 
@@ -45,7 +43,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       setLoading(true);
       const userId = user?.id;
 
-      // 1. Total de pacientes da nutricionista logada
       const pacientesRes = await sql.query(
         `SELECT COUNT(*) as count FROM public.pacientes WHERE nutricionista_id = $1`,
         [userId]
@@ -53,7 +50,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       const total = parseInt(pacientesRes[0]?.count || '0', 10);
       setTotalPacientes(total);
 
-      // 2. Consultas da semana atual
       const consultasRes = await sql.query(
         `SELECT COUNT(*) as count 
          FROM public.consultas c
@@ -66,7 +62,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       const semConsultas = parseInt(consultasRes[0]?.count || '0', 10);
       setConsultasSemana(semConsultas);
 
-      // 3. Pacientes cuja última consulta foi há mais de 30 dias e que não possuem próximo retorno agendado
       const semRetornoRes = await sql.query(
         `SELECT p.id, p.nome,
                 EXTRACT(DAY FROM (now() - MAX(c.data_consulta)))::int as dias_sem_consulta
@@ -102,16 +97,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
   const getHeaderTitle = () => {
     switch (currentView) {
-      case 'dashboard':
-        return 'Painel Geral';
-      case 'pacientes_list':
-        return 'Gestão de Pacientes';
-      case 'pacientes_novo':
-        return 'Novo Paciente';
-      case 'pacientes_perfil':
-        return 'Perfil do Paciente';
-      case 'treinos_list':
-        return 'Prescrição de Treinos';
+      case 'dashboard':      return 'Painel Geral';
+      case 'pacientes_list': return 'Gestão de Pacientes';
+      case 'pacientes_novo': return 'Novo Paciente';
+      case 'pacientes_perfil': return 'Perfil do Paciente';
     }
   };
 
@@ -150,18 +139,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             >
               <Users className="w-5 h-5" />
               <span>Pacientes</span>
-            </button>
-
-            <button
-              onClick={() => setCurrentView('treinos_list')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                currentView === 'treinos_list'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
-                  : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
-              }`}
-            >
-              <Dumbbell className="w-5 h-5" />
-              <span>Treinos</span>
             </button>
           </nav>
         </div>
@@ -212,7 +189,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         </header>
 
         <div className="p-8 max-w-7xl w-full mx-auto space-y-8">
-          {/* View 1: Formulário de Novo Paciente (Prompt 4) */}
+          {/* View: Formulário de Novo Paciente */}
           {currentView === 'pacientes_novo' && (
             <PatientForm
               userId={user.id}
@@ -225,7 +202,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             />
           )}
 
-          {/* View 2: Perfil do Paciente (Prompt 4) */}
+          {/* View: Perfil do Paciente */}
           {currentView === 'pacientes_perfil' && selectedPatientId && (
             <PatientProfile
               patientId={selectedPatientId}
@@ -236,7 +213,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             />
           )}
 
-          {/* View 3: Listagem de Pacientes (Prompt 4) */}
+          {/* View: Listagem de Pacientes */}
           {currentView === 'pacientes_list' && (
             <PatientList
               userId={user.id}
@@ -249,19 +226,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             />
           )}
 
-          {/* View 5: Prescrição de Treinos (Treinos & Exercícios exatamente como na foto) */}
-          {currentView === 'treinos_list' && (
-            <TreinosPrescricao
-              userId={user.id}
-              onSelectPatient={(patientId) => {
-                setSelectedPatientId(patientId);
-                setDefaultProfileSection('planos');
-                setCurrentView('pacientes_perfil');
-              }}
-            />
-          )}
-
-          {/* View 4: Dashboard Principal (Prompt 3) */}
+          {/* View: Dashboard Principal */}
           {currentView === 'dashboard' && (
             <>
               {/* Welcome Banner */}
@@ -284,7 +249,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               {/* Cards Principais */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Card 1 — Total de pacientes ativos */}
-                <div 
+                <div
                   onClick={() => setCurrentView('pacientes_list')}
                   className="bg-white rounded-3xl p-6 border border-emerald-100 shadow-sm hover:shadow-md transition duration-200 cursor-pointer group"
                 >
