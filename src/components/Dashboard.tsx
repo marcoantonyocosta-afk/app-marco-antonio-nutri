@@ -254,7 +254,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                 <div className="relative z-10 max-w-2xl">
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-xs font-medium text-emerald-100 mb-4">
                     <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
-                    <span>Bem-vinda(o) ao Feriani Nutri</span>
+                    <span>Bem-vinda(o) à nova versão NutriFit</span>
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">
                     Olá, {user?.name || 'Nutricionista'}!

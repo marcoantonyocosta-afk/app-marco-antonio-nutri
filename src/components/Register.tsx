@@ -228,7 +228,7 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin, onSuccess }
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          Feriani Nutri &copy; {new Date().getFullYear()} — Plataforma de Gestão Nutricional Integrada
+          NutriFit &copy; {new Date().getFullYear()} — Plataforma Segura para Nutricionistas
         </p>
       </div>
     </div>
