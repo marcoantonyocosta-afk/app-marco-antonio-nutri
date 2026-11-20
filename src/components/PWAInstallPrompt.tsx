@@ -115,11 +115,12 @@ export const PWAInstallPrompt: React.FC = () => {
       <button
         type="button"
         onClick={handleButtonClick}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl text-xs font-black shadow-md shadow-emerald-600/25 transition transform active:scale-95 cursor-pointer"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl sm:rounded-2xl text-xs font-black shadow-md shadow-emerald-600/25 transition transform active:scale-95 cursor-pointer shrink-0"
         title="Instalar Aplicativo NutriFit com 1 Clique"
       >
-        <Download className="w-4 h-4" />
-        <span>Instalar Aplicativo</span>
+        <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+        <span className="hidden sm:inline">Instalar Aplicativo</span>
+        <span className="sm:hidden text-[11px]">Instalar</span>
       </button>
 
       {/* Modal Simplificado & Direto ao Ponto renderizado via Portal no body */}

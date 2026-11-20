@@ -8,7 +8,9 @@ import {
   ChevronRight, 
   Activity,
   Sparkles,
-  Dumbbell
+  Dumbbell,
+  Menu,
+  X
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { sql } from '../lib/neon';
@@ -34,6 +36,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const [consultasSemana, setConsultasSemana] = useState<number | null>(null);
   const [pacientesSemRetorno, setPacientesSemRetorno] = useState<InactivePatient[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Navegação: 'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'treinos_list'
   const [currentView, setCurrentView] = useState<'dashboard' | 'pacientes_list' | 'pacientes_novo' | 'pacientes_perfil' | 'treinos_list'>('dashboard');
@@ -95,6 +98,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     setSelectedPatientId(patientId);
     setDefaultProfileSection(section);
     setCurrentView('pacientes_perfil');
+    setMobileMenuOpen(false);
   };
 
   const getHeaderTitle = () => {
@@ -107,21 +111,46 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     }
   };
 
+  const navigateTo = (view: typeof currentView) => {
+    setCurrentView(view);
+    setMobileMenuOpen(false);
+    if (view === 'dashboard') {
+      loadDashboardData();
+    }
+  };
+
   return (
-    <div className="min-h-screen flex bg-[#f7faf8] text-gray-900 font-sans">
-      {/* Sidebar fixo */}
-      <aside className="w-64 bg-white border-r border-emerald-100 flex flex-col justify-between p-6 shrink-0 shadow-sm">
+    <div className="min-h-screen flex bg-[#f7faf8] text-gray-900 font-sans relative overflow-x-hidden">
+      {/* Backdrop para mobile menu */}
+      {mobileMenuOpen && (
+        <div 
+          onClick={() => setMobileMenuOpen(false)}
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-xs transition-opacity"
+        />
+      )}
+
+      {/* Sidebar - Desktop fixo / Mobile drawer gaveta deslizante */}
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-emerald-100 flex flex-col justify-between p-6 shrink-0 shadow-xl lg:shadow-sm
+        transition-transform duration-300 ease-in-out
+        lg:static lg:translate-x-0
+        ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
         <div className="space-y-8">
-          <div className="flex items-center justify-start px-2">
+          <div className="flex items-center justify-between px-2">
             <Logo size="md" />
+            <button 
+              type="button"
+              onClick={() => setMobileMenuOpen(false)}
+              className="lg:hidden p-1.5 rounded-xl hover:bg-gray-100 text-gray-500 transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
           <nav className="space-y-1.5">
             <button
-              onClick={() => {
-                setCurrentView('dashboard');
-                loadDashboardData();
-              }}
+              onClick={() => navigateTo('dashboard')}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                 currentView === 'dashboard'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
@@ -133,7 +162,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             </button>
 
             <button
-              onClick={() => setCurrentView('pacientes_list')}
+              onClick={() => navigateTo('pacientes_list')}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                 currentView === 'pacientes_list' || currentView === 'pacientes_novo' || currentView === 'pacientes_perfil'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
@@ -145,7 +174,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             </button>
 
             <button
-              onClick={() => setCurrentView('treinos_list')}
+              onClick={() => navigateTo('treinos_list')}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                 currentView === 'treinos_list'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
@@ -160,7 +189,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
         <div className="pt-6 border-t border-gray-100 space-y-4">
           <div className="flex items-center gap-3 px-2">
-            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-sm ring-2 ring-emerald-300/40">
+            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-sm ring-2 ring-emerald-300/40 shrink-0">
               {user?.name ? user.name.slice(0, 2).toUpperCase() : 'NU'}
             </div>
             <div className="flex-1 min-w-0">
@@ -183,18 +212,29 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        {/* Top Header */}
-        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-emerald-100/70 px-8 flex items-center justify-between sticky top-0 z-10">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 tracking-tight">
-              {getHeaderTitle()}
-            </h1>
-            <p className="text-xs text-emerald-700 font-medium">
-              Conectado ao Neon Database em tempo real
-            </p>
+        {/* Top Header Responsivo com botão de menu no celular */}
+        <header className="min-h-16 py-3 bg-white/95 backdrop-blur-md border-b border-emerald-100/70 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-2 rounded-xl bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition cursor-pointer shrink-0"
+              aria-label="Abrir menu lateral"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight truncate">
+                {getHeaderTitle()}
+              </h1>
+              <p className="text-[11px] sm:text-xs text-emerald-700 font-medium truncate">
+                Conectado ao Neon Database em tempo real
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <PWAInstallPrompt />
             <div className="hidden sm:flex items-center gap-2 bg-emerald-50/60 border border-emerald-100 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-700">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -203,7 +243,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
           </div>
         </header>
 
-        <div className="p-8 max-w-7xl w-full mx-auto space-y-8">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6 sm:space-y-8">
           {/* View: Formulário de Novo Paciente */}
           {currentView === 'pacientes_novo' && (
             <PatientForm
@@ -249,17 +289,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
           {/* View: Dashboard Principal */}
           {currentView === 'dashboard' && (
             <>
-              {/* Welcome Banner */}
-              <div className="bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 rounded-3xl p-8 text-white shadow-xl shadow-emerald-900/10 relative overflow-hidden">
+              {/* Welcome Banner Responsivo */}
+              <div className="bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-emerald-900/10 relative overflow-hidden">
                 <div className="relative z-10 max-w-2xl">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-xs font-medium text-emerald-100 mb-4">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-xs font-medium text-emerald-100 mb-3 sm:mb-4">
                     <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
                     <span>Bem-vinda(o) à nova versão NutriFit</span>
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">
                     Olá, {user?.name || 'Nutricionista'}!
                   </h2>
-                  <p className="text-emerald-100/90 text-sm leading-relaxed">
+                  <p className="text-emerald-100/90 text-xs sm:text-sm leading-relaxed">
                     Aqui está o resumo da sua clínica hoje. Acompanhe seus pacientes ativos e retornos pendentes.
                   </p>
                 </div>
@@ -267,22 +307,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               </div>
 
               {/* Cards Principais */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {/* Card 1 — Total de pacientes ativos */}
                 <div
                   onClick={() => setCurrentView('pacientes_list')}
-                  className="bg-white rounded-3xl p-6 border border-emerald-100 shadow-sm hover:shadow-md transition duration-200 cursor-pointer group"
+                  className="bg-white rounded-3xl p-5 sm:p-6 border border-emerald-100 shadow-sm hover:shadow-md transition duration-200 cursor-pointer group"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
                       Total de pacientes ativos
                     </span>
-                    <div className="w-11 h-11 rounded-2xl bg-emerald-100/60 text-emerald-700 flex items-center justify-center group-hover:scale-105 transition">
+                    <div className="w-11 h-11 rounded-2xl bg-emerald-100/60 text-emerald-700 flex items-center justify-center group-hover:scale-105 transition shrink-0">
                       <Users className="w-6 h-6" />
                     </div>
                   </div>
                   <div className="flex items-baseline gap-3">
-                    <span className="text-4xl font-extrabold text-gray-900 tracking-tight">
+                    <span className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
                       {loading ? '...' : totalPacientes ?? 0}
                     </span>
                     <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
@@ -298,17 +338,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                 </div>
 
                 {/* Card 2 — Consultas da semana */}
-                <div className="bg-white rounded-3xl p-6 border border-emerald-100 shadow-sm hover:shadow-md transition duration-200">
+                <div className="bg-white rounded-3xl p-5 sm:p-6 border border-emerald-100 shadow-sm hover:shadow-md transition duration-200">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
                       Consultas da semana
                     </span>
-                    <div className="w-11 h-11 rounded-2xl bg-teal-100/60 text-teal-700 flex items-center justify-center">
+                    <div className="w-11 h-11 rounded-2xl bg-teal-100/60 text-teal-700 flex items-center justify-center shrink-0">
                       <Calendar className="w-6 h-6" />
                     </div>
                   </div>
                   <div className="flex items-baseline gap-3">
-                    <span className="text-4xl font-extrabold text-gray-900 tracking-tight">
+                    <span className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
                       {loading ? '...' : consultasSemana ?? 0}
                     </span>
                     <span className="text-xs font-medium text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full">
@@ -322,14 +362,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               </div>
 
               {/* Card 3 — Pacientes sem retorno */}
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-emerald-100 shadow-sm">
+              <div className="bg-white rounded-3xl p-5 sm:p-8 border border-emerald-100 shadow-sm">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200/60">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200/60 shrink-0">
                       <Clock className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900">
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900">
                         Pacientes sem retorno
                       </h3>
                       <p className="text-xs text-gray-500">
@@ -361,12 +401,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                         onClick={() => handlePatientClick(paciente.id)}
                         className="py-4 px-3 flex items-center justify-between hover:bg-emerald-50/50 rounded-xl transition duration-150 cursor-pointer group"
                       >
-                        <div className="flex items-center gap-3.5">
-                          <div className="w-9 h-9 rounded-full bg-emerald-100/70 text-emerald-800 font-semibold flex items-center justify-center text-xs">
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <div className="w-9 h-9 rounded-full bg-emerald-100/70 text-emerald-800 font-semibold flex items-center justify-center text-xs shrink-0">
                             {paciente.nome.slice(0, 2).toUpperCase()}
                           </div>
-                          <div>
-                            <p className="text-sm font-bold text-gray-900 group-hover:text-emerald-700 transition">
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-gray-900 group-hover:text-emerald-700 transition truncate">
                               {paciente.nome}
                             </p>
                             <p className="text-xs text-amber-600 font-medium">
@@ -375,8 +415,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 group-hover:translate-x-1 transition duration-150">
-                          <span>Ver perfil</span>
+                        <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 group-hover:translate-x-1 transition duration-150 shrink-0">
+                          <span className="hidden sm:inline">Ver perfil</span>
                           <ChevronRight className="w-4 h-4" />
                         </div>
                       </div>
